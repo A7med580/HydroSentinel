@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_styles.dart';
+import '../../../core/navigation/main_navigation.dart';
 import 'auth_providers.dart';
 import '../../dashboard/dashboard_screen.dart';
-import '../../../main.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -62,7 +62,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           // Usually auto-login happens, or we might need to verify email
           // For now, assume auto-login or redirect
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const MainNavigationHolder()),
+            MaterialPageRoute(builder: (_) => const MainNavigation()),
             (route) => false,
           );
         }

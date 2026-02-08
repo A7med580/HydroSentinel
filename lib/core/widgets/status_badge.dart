@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../app_styles.dart';
 
 /// Status types for the badge
-enum StatusType { success, warning, error, info, neutral }
+enum StatusType { success, warning, error, critical, info, neutral }
 
 /// A professional status badge widget for indicating states
 /// Part of the Industrial SaaS design system
@@ -94,6 +94,7 @@ class StatusBadge extends StatelessWidget {
       case StatusType.warning:
         return AppColors.warning;
       case StatusType.error:
+      case StatusType.critical:
         return AppColors.error;
       case StatusType.info:
         return AppColors.info;
@@ -187,6 +188,7 @@ class StatusIndicator extends StatelessWidget {
       case StatusType.warning:
         return AppColors.warning;
       case StatusType.error:
+      case StatusType.critical:
         return AppColors.error;
       case StatusType.info:
         return AppColors.info;

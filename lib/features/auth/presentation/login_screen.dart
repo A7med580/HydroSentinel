@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_styles.dart';
+import '../../../core/navigation/main_navigation.dart';
 import 'auth_providers.dart';
 import '../../dashboard/dashboard_screen.dart';
 import 'signup_screen.dart';
-import '../../../main.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -43,7 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (mounted) {
           // Navigate to main app
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const MainNavigationHolder()),
+            MaterialPageRoute(builder: (_) => const MainNavigation()),
           );
         }
       },
