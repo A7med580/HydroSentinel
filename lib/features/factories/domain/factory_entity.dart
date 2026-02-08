@@ -6,6 +6,8 @@ class FactoryEntity {
   final String driveFolderId;
   final DateTime? lastSyncAt;
   final FactoryStatus status;
+  final double? healthScore;
+  final int? alertCount;
 
   FactoryEntity({
     required this.id,
@@ -13,6 +15,8 @@ class FactoryEntity {
     required this.driveFolderId,
     this.lastSyncAt,
     required this.status,
+    this.healthScore,
+    this.alertCount,
   });
 
   factory FactoryEntity.fromMap(Map<String, dynamic> map) {
@@ -25,6 +29,9 @@ class FactoryEntity {
         (e) => e.name == map['status'],
         orElse: () => FactoryStatus.good,
       ),
+      healthScore: (map['health_score'] as num?)?.toDouble(),
+      alertCount: map['alert_count'] as int?,
     );
   }
 }
+
