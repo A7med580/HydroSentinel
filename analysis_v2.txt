@@ -1,0 +1,163 @@
+Analyzing HydroSentinel...
+
+  error - lib/core/services/data_merge_service.dart:53:14 - The method 'in_' isn't defined for the type 'PostgrestFilterBuilder'. Try correcting the name to the name of an existing method, or defining a method named 'in_'. - undefined_method
+  error - lib/core/services/parsers/daily_parser.dart:53:16 - A value of type 'CellValue?' can't be assigned to a variable of type 'DateTime?'. Try changing the type of the variable, or casting the right-hand type to 'DateTime?'. - invalid_assignment
+           - 'value' refers to a public property so it couldn't be promoted.  See http://dart.dev/go/non-promo-public-field at ../../../../.pub-cache/hosted/pub.dev/excel-4.0.6/lib/src/sheet/data_model.dart:85:18.
+  error - lib/core/services/parsers/weekly_parser.dart:57:21 - A value of type 'CellValue?' can't be assigned to a variable of type 'DateTime?'. Try changing the type of the variable, or casting the right-hand type to 'DateTime?'. - invalid_assignment
+           - 'value' refers to a public property so it couldn't be promoted.  See http://dart.dev/go/non-promo-public-field at ../../../../.pub-cache/hosted/pub.dev/excel-4.0.6/lib/src/sheet/data_model.dart:85:18.
+  error - lib/core/services/parsers/weekly_parser.dart:65:21 - A value of type 'CellValue?' can't be assigned to a variable of type 'DateTime?'. Try changing the type of the variable, or casting the right-hand type to 'DateTime?'. - invalid_assignment
+           - 'value' refers to a public property so it couldn't be promoted.  See http://dart.dev/go/non-promo-public-field at ../../../../.pub-cache/hosted/pub.dev/excel-4.0.6/lib/src/sheet/data_model.dart:85:18.
+  error - lib/features/analytics/data/analytics_repository.dart:2:8 - Target of URI doesn't exist: '../../../../core/error/failures.dart'. Try creating the file referenced by the URI, or try using a URI for a file that does exist. - uri_does_not_exist
+  error - lib/features/analytics/data/analytics_repository.dart:4:8 - Target of URI doesn't exist: '../../domain/analytics_models.dart'. Try creating the file referenced by the URI, or try using a URI for a file that does exist. - uri_does_not_exist
+  error - lib/features/analytics/data/analytics_repository.dart:7:17 - The name 'Failure' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'Failure'. - non_type_as_type_argument
+  error - lib/features/analytics/data/analytics_repository.dart:7:26 - The name 'AnalyticsData' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'AnalyticsData'. - non_type_as_type_argument
+  error - lib/features/analytics/data/analytics_repository.dart:9:14 - Undefined class 'TimePeriod'. Try changing the name to the name of an existing class, or creating a class with the name 'TimePeriod'. - undefined_class
+  error - lib/features/analytics/data/analytics_repository.dart:10:14 - Undefined class 'DateRange'. Try changing the name to the name of an existing class, or creating a class with the name 'DateRange'. - undefined_class
+  error - lib/features/analytics/data/analytics_repository.dart:20:17 - The name 'Failure' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'Failure'. - non_type_as_type_argument
+  error - lib/features/analytics/data/analytics_repository.dart:20:26 - The name 'AnalyticsData' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'AnalyticsData'. - non_type_as_type_argument
+  error - lib/features/analytics/data/analytics_repository.dart:22:14 - Undefined class 'TimePeriod'. Try changing the name to the name of an existing class, or creating a class with the name 'TimePeriod'. - undefined_class
+  error - lib/features/analytics/data/analytics_repository.dart:23:14 - Undefined class 'DateRange'. Try changing the name to the name of an existing class, or creating a class with the name 'DateRange'. - undefined_class
+  error - lib/features/analytics/data/analytics_repository.dart:27:22 - Undefined name 'AnalyticsParameter'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/analytics/data/analytics_repository.dart:36:17 - The name 'AnalyticsParameter' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'AnalyticsParameter'. - non_type_as_type_argument
+  error - lib/features/analytics/data/analytics_repository.dart:40:25 - Undefined name 'AnalyticsParameter'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/analytics/data/analytics_repository.dart:45:20 - The method 'AnalyticsData' isn't defined for the type 'AnalyticsRepositoryImpl'. Try correcting the name to the name of an existing method, or defining a method named 'AnalyticsData'. - undefined_method
+  error - lib/features/analytics/data/analytics_repository.dart:51:19 - The method 'ServerFailure' isn't defined for the type 'AnalyticsRepositoryImpl'. Try correcting the name to the name of an existing method, or defining a method named 'ServerFailure'. - undefined_method
+  error - lib/features/analytics/presentation/analytics_dashboard.dart:5:8 - Target of URI doesn't exist: '../../domain/analytics_models.dart'. Try creating the file referenced by the URI, or try using a URI for a file that does exist. - uri_does_not_exist
+  error - lib/features/analytics/presentation/analytics_dashboard.dart:26:30 - The name 'TimePeriod' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'TimePeriod'. - non_type_as_type_argument
+  error - lib/features/analytics/presentation/analytics_dashboard.dart:28:24 - Undefined name 'TimePeriod'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/analytics/presentation/analytics_dashboard.dart:44:26 - Undefined name 'AppTextStyles'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/analytics/presentation/analytics_dashboard.dart:61:55 - The method 'DateRange' isn't defined for the type 'AnalyticsDashboard'. Try correcting the name to the name of an existing method, or defining a method named 'DateRange'. - undefined_method
+  error - lib/features/analytics/presentation/analytics_dashboard.dart:80:26 - Undefined name 'AnalyticsParameter'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/analytics/presentation/analytics_dashboard.dart:82:31 - Undefined name 'AnalyticsParameter'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/analytics/presentation/analytics_dashboard.dart:83:36 - The property 'metrics' can't be unconditionally accessed because the receiver can be 'null'. Try making the access conditional (using '?.') or adding a null check to the target ('!'). - unchecked_use_of_nullable_value
+  error - lib/features/analytics/presentation/analytics_dashboard.dart:100:27 - Undefined class 'AnalyticsParameter'. Try changing the name to the name of an existing class, or creating a class with the name 'AnalyticsParameter'. - undefined_class
+  error - lib/features/analytics/presentation/analytics_dashboard.dart:103:18 - Undefined name 'AnalyticsParameter'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/analytics/presentation/analytics_provider.dart:4:8 - Target of URI doesn't exist: '../../data/analytics_repository.dart'. Try creating the file referenced by the URI, or try using a URI for a file that does exist. - uri_does_not_exist
+  error - lib/features/analytics/presentation/analytics_provider.dart:5:8 - Target of URI doesn't exist: '../../domain/analytics_models.dart'. Try creating the file referenced by the URI, or try using a URI for a file that does exist. - uri_does_not_exist
+  error - lib/features/analytics/presentation/analytics_provider.dart:12:46 - The name 'AnalyticsRepository' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'AnalyticsRepository'. - non_type_as_type_argument
+  error - lib/features/analytics/presentation/analytics_provider.dart:13:10 - The function 'AnalyticsRepositoryImpl' isn't defined. Try importing the library that defines 'AnalyticsRepositoryImpl', correcting the name to the name of an existing function, or defining a function named 'AnalyticsRepositoryImpl'. - undefined_function
+  error - lib/features/analytics/presentation/analytics_provider.dart:18:9 - Undefined class 'TimePeriod'. Try changing the name to the name of an existing class, or creating a class with the name 'TimePeriod'. - undefined_class
+  error - lib/features/analytics/presentation/analytics_provider.dart:19:9 - Undefined class 'DateRange'. Try changing the name to the name of an existing class, or creating a class with the name 'DateRange'. - undefined_class
+  error - lib/features/analytics/presentation/analytics_provider.dart:23:28 - Undefined class 'TimePeriod'. Try changing the name to the name of an existing class, or creating a class with the name 'TimePeriod'. - undefined_class
+  error - lib/features/analytics/presentation/analytics_provider.dart:23:48 - Undefined class 'DateRange'. Try changing the name to the name of an existing class, or creating a class with the name 'DateRange'. - undefined_class
+  error - lib/features/analytics/presentation/analytics_provider.dart:32:33 - The function 'StateProvider' isn't defined. Try importing the library that defines 'StateProvider', correcting the name to the name of an existing function, or defining a function named 'StateProvider'. - undefined_function
+  error - lib/features/analytics/presentation/analytics_provider.dart:39:13 - Undefined name 'TimePeriod'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/analytics/presentation/analytics_provider.dart:40:12 - The function 'DateRange' isn't defined. Try importing the library that defines 'DateRange', correcting the name to the name of an existing function, or defining a function named 'DateRange'. - undefined_function
+  error - lib/features/analytics/presentation/analytics_provider.dart:45:53 - The name 'AnalyticsData' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'AnalyticsData'. - non_type_as_type_argument
+  error - lib/features/analytics/presentation/widgets/analytics_card.dart:25:45 - The getter 'border' isn't defined for the type 'AppColors'. Try importing the library that defines 'border', correcting the name to the name of an existing getter, or defining a getter or field named 'border'. - undefined_getter
+  error - lib/features/analytics/presentation/widgets/analytics_card.dart:38:30 - Undefined name 'AppTextStyles'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/analytics/presentation/widgets/analytics_card.dart:46:24 - Undefined name 'AppTextStyles'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/analytics/presentation/widgets/analytics_card.dart:49:33 - Undefined name 'AppTextStyles'. Try correcting the name to one that is defined, or defining the name. - undefined_identifier
+  error - lib/features/factories/data/factory_repository_impl.dart:3:8 - Target of URI doesn't exist: '../../../core/error/failures.dart'. Try creating the file referenced by the URI, or try using a URI for a file that does exist. - uri_does_not_exist
+  error - lib/features/factories/data/factory_repository_impl.dart:33:17 - The name 'Failure' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'Failure'. - non_type_as_type_argument
+  error - lib/features/factories/data/factory_repository_impl.dart:44:19 - The method 'ServerFailure' isn't defined for the type 'FactoryRepositoryImpl'. Try correcting the name to the name of an existing method, or defining a method named 'ServerFailure'. - undefined_method
+  error - lib/features/factories/data/factory_repository_impl.dart:49:17 - The name 'Failure' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'Failure'. - non_type_as_type_argument
+  error - lib/features/factories/data/factory_repository_impl.dart:52:43 - Invalid constant value. - invalid_constant
+  error - lib/features/factories/data/factory_repository_impl.dart:52:43 - The method 'AuthFailure' isn't defined for the type 'FactoryRepositoryImpl'. Try correcting the name to the name of an existing method, or defining a method named 'AuthFailure'. - undefined_method
+  error - lib/features/factories/data/factory_repository_impl.dart:119:19 - The method 'ServerFailure' isn't defined for the type 'FactoryRepositoryImpl'. Try correcting the name to the name of an existing method, or defining a method named 'ServerFailure'. - undefined_method
+  error - lib/models/analytics_models.dart:63:21 - The named parameter 'adjustedPsi' is required, but there's no corresponding argument. Try adding the required argument. - missing_required_argument
+  error - lib/models/analytics_models.dart:63:21 - The named parameter 'chlorideSulfateRatio' is required, but there's no corresponding argument. Try adding the required argument. - missing_required_argument
+  error - lib/models/analytics_models.dart:63:21 - The named parameter 'coc' is required, but there's no corresponding argument. Try adding the required argument. - missing_required_argument
+  error - lib/models/analytics_models.dart:63:21 - The named parameter 'larsonSkold' is required, but there's no corresponding argument. Try adding the required argument. - missing_required_argument
+  error - lib/models/analytics_models.dart:63:21 - The named parameter 'stiffDavis' is required, but there's no corresponding argument. Try adding the required argument. - missing_required_argument
+  error - lib/models/analytics_models.dart:63:21 - The named parameter 'tdsEstimation' is required, but there's no corresponding argument. Try adding the required argument. - missing_required_argument
+warning - lib/features/auth/presentation/email_verification_screen.dart:5:8 - Unused import: 'login_screen.dart'. Try removing the import directive. - unused_import
+warning - lib/features/auth/presentation/login_screen.dart:5:8 - Unused import: '../../dashboard/dashboard_screen.dart'. Try removing the import directive. - unused_import
+warning - lib/features/auth/presentation/signup_screen.dart:5:8 - Unused import: '../../dashboard/dashboard_screen.dart'. Try removing the import directive. - unused_import
+warning - lib/features/factories/data/factory_repository_impl.dart:4:8 - Unused import: '../../auth/domain/user_entity.dart'. Try removing the import directive. - unused_import
+warning - lib/features/factories/data/factory_repository_impl.dart:68:25 - The operand can't be 'null', so the condition is always 'false'. Try removing the condition, an enclosing condition, or the whole conditional statement. - unnecessary_null_comparison
+warning - lib/features/factories/data/factory_repository_impl.dart:68:34 - Dead code. Try removing the code, or fixing the code before it so that it can be reached. - dead_code
+warning - lib/features/factories/data/factory_repository_impl.dart:176:13 - The value of the local variable 'existingReport' isn't used. Try removing the variable or using it. - unused_local_variable
+warning - lib/features/factories/presentation/factories_screen.dart:6:8 - Unused import: 'factory_details_screen.dart'. Try removing the import directive. - unused_import
+warning - lib/features/factories/presentation/factory_dashboard_screen.dart:234:5 - Dead code. Try removing the code, or fixing the code before it so that it can be reached. - dead_code
+warning - lib/features/factories/presentation/factory_indices_screen.dart:4:8 - Unused import: '../../../models/chemistry_models.dart'. Try removing the import directive. - unused_import
+warning - lib/features/factories/presentation/factory_simulation_screen.dart:183:5 - Dead code. Try removing the code, or fixing the code before it so that it can be reached. - dead_code
+warning - lib/features/factories/presentation/factory_state_provider.dart:6:8 - Unused import: 'package:hydrosentinel/features/factories/domain/report_entity.dart'. Try removing the import directive. - unused_import
+warning - lib/features/factories/presentation/factory_state_provider.dart:7:8 - Unused import: 'dart:convert'. Try removing the import directive. - unused_import
+warning - lib/features/factories/presentation/factory_state_provider.dart:130:22 - The operand can't be 'null', so the condition is always 'true'. Remove the condition. - unnecessary_null_comparison
+warning - lib/features/factories/presentation/factory_state_provider.dart:132:45 - The operand can't be 'null', so the condition is always 'true'. Remove the condition. - unnecessary_null_comparison
+warning - lib/services/excel_service_v2.dart:5:8 - Unused import: '../models/assessment_models.dart'. Try removing the import directive. - unused_import
+   info - lib/core/services/data_merge_service.dart:58:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/core/services/data_merge_service.dart:60:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/core/services/excel_parser_v2.dart:38:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/core/services/excel_parser_v2.dart:47:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/analytics/domain/analytics_models.dart:1:8 - The imported package 'equatable' isn't a dependency of the importing package. Try adding a dependency for 'equatable' in the 'pubspec.yaml' file. - depend_on_referenced_packages
+   info - lib/features/analytics/presentation/widgets/analytics_card.dart:28:33 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/factories/data/factory_repository_impl.dart:57:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:61:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:74:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:81:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:91:13 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:100:13 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:102:13 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:114:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:141:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:142:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:143:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:146:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:156:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:159:14 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:161:14 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:164:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:167:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:190:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:198:13 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:200:14 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:203:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:212:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:216:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:259:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:266:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:292:11 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:316:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/factory_repository_impl.dart:319:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/storage_service.dart:15:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/storage_service.dart:18:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/storage_service.dart:20:12 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/storage_service.dart:23:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/storage_service.dart:26:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/storage_service.dart:28:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/storage_service.dart:30:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/verification_service.dart:58:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/verification_service.dart:116:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/verification_service.dart:118:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/verification_service.dart:120:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/verification_service.dart:172:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/data/verification_service.dart:178:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/presentation/factories_screen.dart:82:32 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/factories/presentation/factory_dashboard_screen.dart:279:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/presentation/factory_dashboard_screen.dart:281:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/presentation/factory_dashboard_screen.dart:284:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/presentation/factory_dashboard_screen.dart:286:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/presentation/factory_indices_screen.dart:101:59 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/factories/presentation/factory_indices_screen.dart:199:59 - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - lib/features/factories/presentation/factory_state_provider.dart:81:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/features/factories/presentation/factory_state_provider.dart:97:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service.dart:23:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service.dart:26:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service.dart:32:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service.dart:34:10 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service.dart:36:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service.dart:58:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service.dart:73:10 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service.dart:98:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service_v2.dart:22:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service_v2.dart:26:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service_v2.dart:28:8 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service_v2.dart:30:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service_v2.dart:36:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service_v2.dart:50:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service_v2.dart:54:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service_v2.dart:86:39 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/excel_service_v2.dart:87:40 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/excel_service_v2.dart:88:66 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/excel_service_v2.dart:89:41 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/excel_service_v2.dart:90:63 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/excel_service_v2.dart:91:59 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/excel_service_v2.dart:92:59 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/excel_service_v2.dart:93:67 - Statements in an if should be enclosed in a block. Try wrapping the statement in a block. - curly_braces_in_flow_control_structures
+   info - lib/services/excel_service_v2.dart:127:7 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service_v2.dart:173:9 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+   info - lib/services/excel_service_v2.dart:205:5 - Don't invoke 'print' in production code. Try using a logging framework. - avoid_print
+
+156 issues found.

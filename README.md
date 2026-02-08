@@ -8,6 +8,57 @@
 
 ---
 
+---
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    User[User] -->|Login| Auth[Auth Feature]
+    Auth -->|Session| SupabaseAuth[Supabase Auth]
+    
+    User -->|View Factories| FactoriesUI[Factories Screen]
+    FactoriesUI -->|Watch| FactoryRepo[Factory Repository]
+    
+    FactoryRepo -->|Sync| SyncManager[Sync Manager]
+    
+    SyncManager -->|Fetch Folders| GDrive[Google Drive API]
+    SyncManager -->|Store Metadata| SupabaseDB[Supabase DB]
+    
+    GDrive -->|New Excel File| AnalysisEngine[Analysis Engine]
+    AnalysisEngine -->|Results| SupabaseDB
+    
+    SupabaseDB -->|Real-time Updates| FactoriesUI
+```
+
+### Value Extraction Architecture
+```mermaid
+graph TD
+    RawFile[Raw .xlsx] --> Normalizer[ExcelNormalizer]
+    Normalizer --> Structured[Normalized Table]
+    Structured --> Validator[ExcelValidator]
+    Validator --> Parser[UniversalParser]
+    Parser --> DomainModels[CoolingTowerData / ROData]
+    
+    Generator[TemplateGenerator] --> TemplateFile[.xlsx Export]
+```
+
+### File Upload Flow
+```mermaid
+graph TD
+    A[User taps Upload FAB] --> B[File picker opens]
+    B --> C{User selects .xlsx file?}
+    C -->|Cancel| D[Close picker]
+    C -->|Yes| E[Validate file size]
+    E -->|Greater than 10MB| F[Show error: File too large]
+    E -->|Less than 10MB| G[Upload to Storage]
+    G --> H[Show: Syncing...]
+    H --> I[Trigger sync process]
+    I --> J[Refresh factory data]
+    J --> K[Show: File processed!]
+```
+
+
 ## 🚀 Features
 
 -   **Advanced Chemistry Analysis**: Automatically calculates indices like LSI, RSI, PSI, and more.

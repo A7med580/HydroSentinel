@@ -15,6 +15,7 @@ class CalculatedIndices {
   final double adjustedPsi;
   final double tdsEstimation;
   final double chlorideSulfateRatio;
+  final DateTime timestamp;
 
   CalculatedIndices({
     required this.lsi,
@@ -26,6 +27,7 @@ class CalculatedIndices {
     required this.adjustedPsi,
     required this.tdsEstimation,
     required this.chlorideSulfateRatio,
+    required this.timestamp,
   });
 }
 
@@ -36,6 +38,7 @@ class RiskAssessment {
   final RiskLevel scalingRisk;
   final RiskLevel corrosionRisk;
   final RiskLevel foulingRisk;
+  final DateTime timestamp;
 
   RiskAssessment({
     required this.scalingScore,
@@ -44,6 +47,7 @@ class RiskAssessment {
     required this.scalingRisk,
     required this.corrosionRisk,
     required this.foulingRisk,
+    required this.timestamp,
   });
 }
 

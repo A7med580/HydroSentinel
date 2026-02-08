@@ -1,0 +1,136 @@
+Analyzing HydroSentinel...                                      
+
+   info • Don't invoke 'print' in production code • lib/core/services/data_merge_service.dart:58:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/services/data_merge_service.dart:60:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/services/excel_parser_v2.dart:38:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/core/services/excel_parser_v2.dart:47:11 • avoid_print
+warning • Unused import: 'login_screen.dart' • lib/features/auth/presentation/email_verification_screen.dart:5:8 • unused_import
+warning • Unused import: '../../dashboard/dashboard_screen.dart' • lib/features/auth/presentation/login_screen.dart:5:8 • unused_import
+warning • Unused import: '../../dashboard/dashboard_screen.dart' • lib/features/auth/presentation/signup_screen.dart:5:8 • unused_import
+warning • Unused import: '../../auth/domain/user_entity.dart' • lib/features/factories/data/factory_repository_impl.dart:4:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:57:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:61:9 • avoid_print
+warning • The operand can't be 'null', so the condition is always 'false' • lib/features/factories/data/factory_repository_impl.dart:68:25 • unnecessary_null_comparison
+warning • Dead code • lib/features/factories/data/factory_repository_impl.dart:68:34 • dead_code
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:74:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:81:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:91:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:100:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:102:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:114:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:141:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:142:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:143:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:146:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:156:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:159:14 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:161:14 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:164:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:167:5 • avoid_print
+warning • The value of the local variable 'existingReport' isn't used • lib/features/factories/data/factory_repository_impl.dart:176:13 • unused_local_variable
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:190:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:198:13 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:200:14 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:203:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:212:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:216:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:259:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:266:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:292:11 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:316:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/factory_repository_impl.dart:319:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/storage_service.dart:16:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/storage_service.dart:19:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/storage_service.dart:21:12 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/storage_service.dart:24:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/storage_service.dart:27:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/storage_service.dart:29:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/storage_service.dart:31:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/storage_service.dart:86:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/verification_service.dart:58:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/verification_service.dart:116:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/verification_service.dart:118:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/verification_service.dart:120:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/verification_service.dart:172:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/data/verification_service.dart:178:7 • avoid_print
+warning • Unused import: 'factory_details_screen.dart' • lib/features/factories/presentation/factories_screen.dart:6:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/factories/presentation/factories_screen.dart:82:32 • deprecated_member_use
+warning • Dead code • lib/features/factories/presentation/factory_dashboard_screen.dart:234:5 • dead_code
+   info • Don't invoke 'print' in production code • lib/features/factories/presentation/factory_dashboard_screen.dart:279:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/presentation/factory_dashboard_screen.dart:281:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/presentation/factory_dashboard_screen.dart:284:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/presentation/factory_dashboard_screen.dart:286:7 • avoid_print
+warning • Unused import: '../data/storage_service.dart' • lib/features/factories/presentation/factory_details_screen.dart:10:8 • unused_import
+   info • Don't use 'BuildContext's across async gaps • lib/features/factories/presentation/factory_details_screen.dart:92:30 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/features/factories/presentation/factory_details_screen.dart:99:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps • lib/features/factories/presentation/factory_details_screen.dart:109:30 • use_build_context_synchronously
+warning • Unused import: '../../../models/chemistry_models.dart' • lib/features/factories/presentation/factory_indices_screen.dart:4:8 • unused_import
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/factories/presentation/factory_indices_screen.dart:101:59 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/factories/presentation/factory_indices_screen.dart:199:59 • deprecated_member_use
+warning • Dead code • lib/features/factories/presentation/factory_simulation_screen.dart:183:5 • dead_code
+warning • Unused import: 'package:hydrosentinel/features/factories/domain/report_entity.dart' • lib/features/factories/presentation/factory_state_provider.dart:6:8 • unused_import
+warning • Unused import: 'dart:convert' • lib/features/factories/presentation/factory_state_provider.dart:7:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/features/factories/presentation/factory_state_provider.dart:81:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/features/factories/presentation/factory_state_provider.dart:97:9 • avoid_print
+warning • The operand can't be 'null', so the condition is always 'true' • lib/features/factories/presentation/factory_state_provider.dart:130:22 • unnecessary_null_comparison
+warning • The operand can't be 'null', so the condition is always 'true' • lib/features/factories/presentation/factory_state_provider.dart:132:45 • unnecessary_null_comparison
+warning • The declaration '<unnamed>' isn't referenced • lib/services/excel_service.dart:6:7 • unused_element
+  error • The body might complete normally, causing 'null' to be returned, but the return type, 'FutureOr<Map<String, dynamic>>', is a potentially non-nullable type • lib/services/excel_service.dart:12:39 • body_might_complete_normally
+warning • The value of the local variable 'roData' isn't used • lib/services/excel_service.dart:16:13 • unused_local_variable
+   info • Don't invoke 'print' in production code • lib/services/excel_service.dart:23:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service.dart:26:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service.dart:32:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service.dart:36:10 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service.dart:38:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service.dart:64:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service.dart:77:10 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service.dart:151:3 • avoid_print
+  error • The property 'ph' can't be unconditionally accessed because the receiver can be 'null' • lib/services/excel_service.dart:151:61 • unchecked_use_of_nullable_value
+  error • The property 'alkalinity' can't be unconditionally accessed because the receiver can be 'null' • lib/services/excel_service.dart:151:96 • unchecked_use_of_nullable_value
+  error • The property 'zinc' can't be unconditionally accessed because the receiver can be 'null' • lib/services/excel_service.dart:151:138 • unchecked_use_of_nullable_value
+  error • Undefined name 'excel' • lib/services/excel_service.dart:156:19 • undefined_identifier
+  error • Expected a class member • lib/services/excel_service.dart:157:5 • expected_class_member
+  error • Expected an identifier • lib/services/excel_service.dart:157:8 • missing_identifier
+   info • Missing type annotation • lib/services/excel_service.dart:157:9 • strict_top_level_inference
+  error • Expected to find ')' • lib/services/excel_service.dart:157:17 • expected_token
+  error • Undefined name 'roData' • lib/services/excel_service.dart:164:9 • undefined_identifier
+  error • Expected a class member • lib/services/excel_service.dart:194:5 • expected_class_member
+  error • Expected an identifier • lib/services/excel_service.dart:194:12 • missing_identifier
+  error • Methods must have an explicit list of parameters • lib/services/excel_service.dart:194:12 • missing_method_parameters
+  error • Expected to find ';' • lib/services/excel_service.dart:195:7 • expected_token
+  error • Expected an identifier • lib/services/excel_service.dart:195:21 • missing_identifier
+  error • Unexpected text ';' • lib/services/excel_service.dart:195:21 • unexpected_token
+  error • Expected to find ';' • lib/services/excel_service.dart:195:23 • expected_token
+  error • Undefined name 'coolingTowerData' • lib/services/excel_service.dart:195:23 • undefined_identifier
+  error • Expected an identifier • lib/services/excel_service.dart:195:39 • missing_identifier
+  error • Unexpected text ';' • lib/services/excel_service.dart:195:39 • unexpected_token
+  error • Expected to find ';' • lib/services/excel_service.dart:196:7 • expected_token
+  error • Expected an identifier • lib/services/excel_service.dart:196:11 • missing_identifier
+  error • Unexpected text ';' • lib/services/excel_service.dart:196:11 • unexpected_token
+  error • Expected to find ';' • lib/services/excel_service.dart:196:13 • expected_token
+  error • Undefined name 'roData' • lib/services/excel_service.dart:196:13 • undefined_identifier
+  error • Expected an identifier • lib/services/excel_service.dart:196:19 • missing_identifier
+  error • Unexpected text ';' • lib/services/excel_service.dart:196:19 • unexpected_token
+  error • Expected a class member • lib/services/excel_service.dart:197:6 • expected_class_member
+  error • Expected a method, getter, setter or operator declaration • lib/services/excel_service.dart:199:1 • expected_executable
+warning • Unused import: '../models/assessment_models.dart' • lib/services/excel_service_v2.dart:5:8 • unused_import
+   info • Don't invoke 'print' in production code • lib/services/excel_service_v2.dart:22:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service_v2.dart:26:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service_v2.dart:28:8 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service_v2.dart:30:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service_v2.dart:36:5 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service_v2.dart:50:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service_v2.dart:54:5 • avoid_print
+   info • Statements in an if should be enclosed in a block • lib/services/excel_service_v2.dart:86:39 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/excel_service_v2.dart:87:40 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/excel_service_v2.dart:88:66 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/excel_service_v2.dart:89:41 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/excel_service_v2.dart:90:63 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/excel_service_v2.dart:91:59 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/excel_service_v2.dart:92:59 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/services/excel_service_v2.dart:93:67 • curly_braces_in_flow_control_structures
+   info • Don't invoke 'print' in production code • lib/services/excel_service_v2.dart:127:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service_v2.dart:173:9 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/excel_service_v2.dart:205:5 • avoid_print
+
+132 issues found. (ran in 2.3s)

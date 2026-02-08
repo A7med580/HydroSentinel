@@ -4,8 +4,12 @@ import 'package:file_picker/file_picker.dart';
 import '../../core/app_styles.dart';
 import '../../services/state_provider.dart';
 import '../../models/chemistry_models.dart';
-import '../../services/excel_service.dart';
+import '../../services/excel_service.dart'; // Keep for now if needed, but we favour Universal
+import '../../core/services/excel/universal_excel_parser.dart';
+import '../../core/services/excel/template_generator.dart'; // NEW
 import '../../services/calculation_engine.dart';
+import 'package:path_provider/path_provider.dart'; // NEW
+import 'dart:io'; // NEW
 
 class ParametersScreen extends ConsumerWidget {
   const ParametersScreen({super.key});
@@ -18,6 +22,11 @@ class ParametersScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('WATER CHEMISTRY'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.download),
+            onPressed: () => _handleDownloadTemplate(context),
+            tooltip: 'Download Template',
+          ),
           IconButton(
             icon: const Icon(Icons.edit_note),
             onPressed: () => _showManualEntryDialog(context, ref),
@@ -146,11 +155,22 @@ class ParametersScreen extends ConsumerWidget {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['xlsx'],
+      withData: true, // Ensure we get bytes
     );
 
     if (result != null) {
       try {
-        final data = await ExcelService.parseExcel(result.files.single.path!);
+        final file = result.files.single;
+        Map<String, dynamic> data;
+        
+        if (file.path != null) {
+          // FilePicker might give path
+           data = await UniversalExcelParser.parse(File(file.path!).readAsBytesSync());
+        } else if (file.bytes != null) {
+           data = await UniversalExcelParser.parse(file.bytes!);
+        } else {
+           throw Exception('File cannot be read (no path or bytes)');
+        }
         if (!context.mounted) return;
         ref.read(systemProvider.notifier).updateData(
           data['coolingTower'] as CoolingTowerData?,
@@ -165,6 +185,30 @@ class ParametersScreen extends ConsumerWidget {
           SnackBar(content: Text('Error parsing Excel: $e')),
         );
       }
+    }
+  }
+
+  Future<void> _handleDownloadTemplate(BuildContext context) async {
+    try {
+      final bytes = await TemplateGenerator.generate();
+      if (bytes == null) return;
+      
+      // Save to Documents
+      final directory = await getApplicationDocumentsDirectory();
+      final path = '${directory.path}/HydroSentinel_Template.xlsx';
+      final file = File(path);
+      await file.writeAsBytes(bytes);
+      
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Template saved to: $path')),
+      );
+      print('Template saved to: $path');
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error generating template: $e')),
+      );
     }
   }
 
