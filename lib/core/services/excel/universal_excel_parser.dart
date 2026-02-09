@@ -8,8 +8,10 @@ import 'schema_definition.dart';
 
 /// The main entry point for robust Excel ingestion.
 /// Orchestrates Normalization -> Validation -> Domain Mapping.
+/// NOW SUPPORTS MULTI-ROW FILES (e.g., monthly data with 31 rows)
 class UniversalExcelParser {
   
+  /// Parse Excel bytes and return ALL measurements (not just first row)
   static Future<Map<String, dynamic>> parse(List<int> bytes) async {
     var excel = Excel.decodeBytes(bytes);
     
@@ -31,22 +33,52 @@ class UniversalExcelParser {
 
     // 2. Normalize
     final normalizedRows = ExcelNormalizer.normalize(sheet);
+    print('DEBUG: [UniversalParser] Normalized ${normalizedRows.length} rows');
     
-    // 3. Validate
+    // 3. Validate dataset
     ExcelValidator.validateDataset(normalizedRows);
 
-    // 4. Map to Domain Models
-    // For now, we assume the file represents ONE report (the latest one or first row).
-    // Future: Support multi-row historical import.
-    final latestRow = normalizedRows.first; // TODO: or sort by date?
+    // 4. Map ALL rows to Domain Models
+    List<CoolingTowerData> allCTData = [];
+    List<ROData> allROData = [];
 
-    // Validate Row Specifics
-    final errors = ExcelValidator.validateRow(latestRow);
-    if (errors.isNotEmpty) {
-      throw FormatException('Validation Failed: ${errors.join(", ")}');
+    for (int i = 0; i < normalizedRows.length; i++) {
+      final row = normalizedRows[i];
+      
+      // Validate row
+      final errors = ExcelValidator.validateRow(row);
+      if (errors.isNotEmpty) {
+        print('WARNING: Skipping row $i: ${errors.join(", ")}');
+        continue;
+      }
+
+      final result = _mapToDomain(row);
+      
+      final ctData = result['coolingTower'] as CoolingTowerData?;
+      final roData = result['ro'] as ROData?;
+      
+      if (ctData != null) allCTData.add(ctData);
+      if (roData != null) allROData.add(roData);
     }
 
-    return _mapToDomain(latestRow);
+    print('DEBUG: [UniversalParser] Parsed ${allCTData.length} CT measurements, ${allROData.length} RO measurements');
+
+    // Sort by timestamp (oldest first)
+    allCTData.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    allROData.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    // Backward compatibility: also return single latest measurement
+    CoolingTowerData? latestCT = allCTData.isNotEmpty ? allCTData.last : null;
+    ROData? latestRO = allROData.isNotEmpty ? allROData.last : null;
+
+    return {
+      // NEW: All measurements for multi-row support
+      'allCTData': allCTData,
+      'allROData': allROData,
+      // BACKWARD COMPAT: Single values (latest measurement)
+      'coolingTower': latestCT,
+      'ro': latestRO,
+    };
   }
 
   static Map<String, dynamic> _mapToDomain(Map<String, dynamic> row) {
@@ -74,9 +106,7 @@ class UniversalExcelParser {
       timestamp: date,
     );
 
-    // RO Data (if exists in same row or separate logic needed?)
-    // Assuming RO might be in the same row if headers are unique.
-    // If RO is on a separate sheet, we need to normalize that sheet too.
+    // RO Data (if exists in same row)
     ROData? roData;
     if (row.containsKey(ExcelSchema.freeChlorine) || row.containsKey(ExcelSchema.silica)) {
         roData = ROData(

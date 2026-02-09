@@ -175,76 +175,84 @@ class FactoryRepositoryImpl implements FactoryRepository {
         // --- UNIVERSAL PARSER PIPELINE ---
         CoolingTowerData? ctData;
         ROData? roData;
+        List<CoolingTowerData> allCTData = [];
+        List<ROData> allROData = [];
         
         try {
           print('DEBUG: [UniversalParser] Processing file: ${file.name}');
           final result = await UniversalExcelParser.parse(bytes);
           
+          // NEW: Get ALL measurements from multi-row files
+          allCTData = (result['allCTData'] as List<CoolingTowerData>?) ?? [];
+          allROData = (result['allROData'] as List<ROData>?) ?? [];
+          
+          // Single values for backward compatibility
           ctData = result['coolingTower'] as CoolingTowerData?;
           roData = result['ro'] as ROData?;
           
-          if (ctData == null) {
+          print('DEBUG: [UniversalParser] Parsed ${allCTData.length} measurements from file');
+          
+          if (allCTData.isEmpty) {
              print('Warning: No Cooling Tower data found in ${file.name}');
-             // We could continue, but let's allow partial data (RO only) if valid
           }
-
-          print('DEBUG: [UniversalParser] Success. pH: ${ctData?.ph.value}');
           
         } catch (e, stack) {
           print('DEBUG: [UniversalParser] Error processing file ${file.name}: $e');
           print(stack);
-          // If detailed parsing fails, we could potentially suppress or log error,
-          // but we shouldn't insert a blank report unless we want to signal failure?
-          // For now, let's skip processing this file to avoid bad data.
           continue; 
         }
 
-        if (ctData == null && roData == null) {
+        if (allCTData.isEmpty && ctData == null && roData == null) {
            print('DEBUG: File ${file.name} yielded no data.');
            continue;
         }
 
-        // --- V2 PERSISTENCE BRIDGE ---
-        // We map the Universal results to MeasurementV2 to keep the V2 table populated.
+        // --- V2 PERSISTENCE BRIDGE (NOW SAVES ALL MEASUREMENTS) ---
         try {
-           if (ctData != null) {
-              final indices = CalculationEngine.calculateIndices(ctData);
-              // Calculate Risk? Risk is calculated later for ReportEntity.
-              
-              final v2Record = MeasurementV2(
-                factoryId: factoryId,
-                periodType: PeriodType.daily, // Assume daily for now, or detect from filename?
-                startDate: ctData.timestamp,
-                endDate: ctData.timestamp,
-                data: {
-                  'ph': ctData.ph.value,
-                  'alkalinity': ctData.alkalinity.value,
-                  'conductivity': ctData.conductivity.value,
-                  'hardness': ctData.totalHardness.value,
-                  'chloride': ctData.chloride.value,
-                  'zinc': ctData.zinc.value,
-                  'iron': ctData.iron.value,
-                  'phosphates': ctData.phosphates.value,
-                  // RO Data if available
-                  if (roData != null) ...{
-                    'free_chlorine': roData.freeChlorine.value,
-                    'silica': roData.silica.value,
-                    'ro_conductivity': roData.roConductivity.value,
-                  }
-                },
-                indices: {
-                  'lsi': indices.lsi,
-                  'rsi': indices.rsi,
-                  'psi': indices.psi,
-                },
-              );
-              
-              final mergeService = DataMergeService(supabase);
-              await mergeService.mergeMeasurements([v2Record]);
-              print('DEBUG: [Universal->V2] Bridged data to measurements_v2 table.');
+           final mergeService = DataMergeService(supabase);
+           List<MeasurementV2> v2Records = [];
+           
+           // Process ALL measurements from the file
+           for (int i = 0; i < allCTData.length; i++) {
+             final ct = allCTData[i];
+             final ro = i < allROData.length ? allROData[i] : null;
+             final indices = CalculationEngine.calculateIndices(ct);
+             
+             v2Records.add(MeasurementV2(
+               factoryId: factoryId,
+               periodType: PeriodType.daily,
+               startDate: ct.timestamp,
+               endDate: ct.timestamp,
+               data: {
+                 'ph': ct.ph.value,
+                 'alkalinity': ct.alkalinity.value,
+                 'conductivity': ct.conductivity.value,
+                 'hardness': ct.totalHardness.value,
+                 'chloride': ct.chloride.value,
+                 'zinc': ct.zinc.value,
+                 'iron': ct.iron.value,
+                 'phosphates': ct.phosphates.value,
+                 if (ro != null) ...{
+                   'free_chlorine': ro.freeChlorine.value,
+                   'silica': ro.silica.value,
+                   'ro_conductivity': ro.roConductivity.value,
+                 }
+               },
+               indices: {
+                 'lsi': indices.lsi,
+                 'rsi': indices.rsi,
+                 'psi': indices.psi,
+               },
+             ));
+           }
+           
+           // Merge all measurements to V2 table
+           if (v2Records.isNotEmpty) {
+             await mergeService.mergeMeasurements(v2Records);
+             print('DEBUG: [Universal->V2] Saved ${v2Records.length} measurements to measurements_v2 table.');
            }
         } catch (e, stack) {
-           print('DEBUG: [V2 Bridge] Failed to save V2 record: $e');
+           print('DEBUG: [V2 Bridge] Failed to save V2 records: $e');
            print(stack);
            // Non-fatal, continue to V1 persistence so UI still works
         }
