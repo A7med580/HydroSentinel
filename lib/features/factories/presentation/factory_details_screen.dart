@@ -6,9 +6,8 @@ import 'package:file_picker/file_picker.dart';
 import '../../../core/app_styles.dart';
 import '../domain/factory_entity.dart';
 import '../domain/report_entity.dart';
-import '../data/verification_service.dart';
 import '../data/storage_service.dart';
-import 'widgets/delete_verification_dialog.dart';
+import 'widgets/simple_delete_dialog.dart';
 import 'factory_providers.dart';
 
 class FactoryDetailsScreen extends ConsumerWidget {
@@ -203,18 +202,30 @@ class FactoryDetailsScreen extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     String reportId,
-    String reportName,
+    String fileName,
   ) async {
-    final verificationService = VerificationService(Supabase.instance.client);
+    final storageService = StorageService(Supabase.instance.client);
+    final email = Supabase.instance.client.auth.currentUser?.email;
+    
+    if (email == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Error: Not logged in'),
+          backgroundColor: AppColors.riskCritical,
+        ),
+      );
+      return;
+    }
     
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => DeleteVerificationDialog(
-        reportId: reportId,
-        reportName: reportName,
-        onRequestCode: () => verificationService.requestDeletionCode(reportId),
-        onVerifyAndDelete: (code) => verificationService.verifyAndDeleteReport(reportId, code),
+      builder: (context) => SimpleDeleteDialog(
+        reportName: fileName,
+        onDelete: () async {
+          // Delete from Supabase storage using correct path
+          await storageService.deleteFile(email, factory.name, fileName);
+        },
       ),
     );
     

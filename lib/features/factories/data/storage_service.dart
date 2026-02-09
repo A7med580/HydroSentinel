@@ -88,4 +88,17 @@ class StorageService {
       throw ServerFailure('Failed to upload file: $e');
     }
   }
+
+  /// Deletes a file from a factory folder
+  Future<void> deleteFile(String email, String factoryName, String fileName) async {
+    try {
+      final emailPrefix = email.split('@')[0];
+      final path = 'user_$emailPrefix/$factoryName/$fileName';
+
+      await _client.storage.from('factories').remove([path]);
+      print('DEBUG: Deleted file at $path');
+    } catch (e) {
+      throw ServerFailure('Failed to delete file: $e');
+    }
+  }
 }
