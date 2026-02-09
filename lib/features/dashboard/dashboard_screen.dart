@@ -4,30 +4,59 @@ import '../../core/app_styles.dart';
 import '../../core/widgets/kpi_card.dart';
 import '../../core/widgets/period_selector.dart';
 import '../../core/widgets/status_badge.dart';
-import '../../services/state_provider.dart';
+import '../../services/aggregated_data_provider.dart';
 import '../../models/assessment_models.dart';
 
-class DashboardScreen extends ConsumerStatefulWidget {
+class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
-  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedPeriod = ref.watch(selectedPeriodProvider);
+    final asyncData = ref.watch(aggregatedDataProvider);
 
-class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  TimePeriod _selectedPeriod = TimePeriod.week;
-
-  @override
-  Widget build(BuildContext context) {
-    final state = ref.watch(systemProvider);
-
-    if (state.isLoading || state.health == null) {
-      return const Scaffold(
+    return asyncData.when(
+      loading: () => const Scaffold(
         body: Center(
           child: CircularProgressIndicator(color: AppColors.primary),
         ),
-      );
-    }
+      ),
+      error: (err, stack) => Scaffold(
+        body: Center(
+          child: Text('Error: $err'),
+        ),
+      ),
+      data: (data) {
+        if (data == null) {
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.water_drop_outlined, size: 64, color: AppColors.textMuted),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No measurement data yet',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 18),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Upload an Excel file from the Factories screen',
+                    style: TextStyle(color: AppColors.textMuted, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        
+        return _buildDashboardContent(context, ref, data, selectedPeriod);
+      },
+    );
+  }
+  
+  Widget _buildDashboardContent(BuildContext context, WidgetRef ref, AggregatedData data, TimePeriod selectedPeriod) {
+
 
     return Scaffold(
       body: SafeArea(
@@ -54,18 +83,30 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               padding: const EdgeInsets.all(AppStyles.paddingM),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
-                  // Period Selector
+                  // Period Selector with data count
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Overview',
-                        style: Theme.of(context).textTheme.headlineMedium,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Overview',
+                            style: Theme.of(context).textTheme.headlineMedium,
+                          ),
+                          Text(
+                            '${data.measurementCount} measurements',
+                            style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
                       PeriodSelector(
-                        selectedPeriod: _selectedPeriod,
+                        selectedPeriod: selectedPeriod,
                         onPeriodChanged: (period) {
-                          setState(() => _selectedPeriod = period);
+                          ref.read(selectedPeriodProvider.notifier).setPeriod(period);
                         },
                         showLabels: false,
                       ),
@@ -74,7 +115,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   const SizedBox(height: AppStyles.paddingL),
 
                   // System Health Card
-                  _buildHealthCard(state.health!),
+                  _buildHealthCard(data.health),
                   const SizedBox(height: AppStyles.paddingM),
 
                   // Risk KPIs Grid
@@ -83,33 +124,31 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: AppStyles.paddingM),
-                  _buildRiskGrid(state.riskAssessment!),
+                  _buildRiskGrid(data.risk),
                   const SizedBox(height: AppStyles.paddingL),
 
                   // RO Protection (if available)
-                  if (state.roAssessment != null) ...[
+                  if (data.roAssessment != null) ...[
                     Text(
                       'RO Protection',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: AppStyles.paddingM),
-                    _buildROGrid(state.roAssessment!),
+                    _buildROGrid(data.roAssessment!),
                     const SizedBox(height: AppStyles.paddingL),
                   ],
 
                   // Indices
-                  if (state.indices != null) ...[
-                    Text(
-                      'Calculated Indices',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: AppStyles.paddingM),
-                    _buildIndicesGrid(state.indices!),
-                    const SizedBox(height: AppStyles.paddingL),
-                  ],
+                  Text(
+                    'Calculated Indices',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: AppStyles.paddingM),
+                  _buildIndicesGrid(data.indices),
+                  const SizedBox(height: AppStyles.paddingL),
 
                   // Active Alerts
-                  _buildAlertsSection(state.recommendations),
+                  _buildAlertsSection(context, data.recommendations),
                   const SizedBox(height: AppStyles.paddingXL),
                 ]),
               ),
@@ -321,7 +360,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildAlertsSection(List<Recommendation> recommendations) {
+  Widget _buildAlertsSection(BuildContext context, List<Recommendation> recommendations) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
