@@ -7,11 +7,15 @@ abstract class AuthRemoteDataSource {
   Future<UserEntity> signUpWithEmail(String email, String password);
   Future<void> signOut();
   Future<UserEntity?> getCurrentUser();
+  Future<void> resetPasswordForEmail(String email);
   Stream<UserEntity?> get authStateChanges;
 }
 
 class SupabaseAuthDataSource implements AuthRemoteDataSource {
   final SupabaseClient client;
+
+  // Getter to expose client to repository for advanced checks (like getUser)
+  SupabaseClient get supabaseClient => client;
 
   SupabaseAuthDataSource(this.client);
 
@@ -31,7 +35,11 @@ class SupabaseAuthDataSource implements AuthRemoteDataSource {
   @override
   Future<UserEntity> signUpWithEmail(String email, String password) async {
     try {
-      final response = await client.auth.signUp(email: email, password: password);
+      final response = await client.auth.signUp(
+        email: email, 
+        password: password,
+        emailRedirectTo: 'hydrosentinel://login-callback',
+      );
       if (response.user == null) throw const AuthFailure('Sign up failed: No user returned');
       return UserEntity(id: response.user!.id, email: response.user!.email ?? '');
     } on AuthException catch (e) {
@@ -39,6 +47,17 @@ class SupabaseAuthDataSource implements AuthRemoteDataSource {
     } catch (e) {
       throw AuthFailure(e.toString());
     }
+  }
+
+  @override
+  Future<void> resetPasswordForEmail(String email) async {
+     try {
+       await client.auth.resetPasswordForEmail(email);
+     } on AuthException catch (e) {
+       throw AuthFailure(e.message);
+     } catch (e) {
+       throw AuthFailure(e.toString());
+     }
   }
 
   @override
@@ -52,9 +71,16 @@ class SupabaseAuthDataSource implements AuthRemoteDataSource {
 
   @override
   Future<UserEntity?> getCurrentUser() async {
-    final user = client.auth.currentUser;
-    if (user == null) return null;
-    return UserEntity(id: user.id, email: user.email ?? '');
+    try {
+      // Use getUser() to verify the session with the server
+      final response = await client.auth.getUser();
+      final user = response.user;
+      if (user == null) return null;
+      return UserEntity(id: user.id, email: user.email ?? '');
+    } catch (e) {
+      // If server check fails (e.g. invalid session), return null so repo can handle logout
+      return null;
+    }
   }
 
   @override

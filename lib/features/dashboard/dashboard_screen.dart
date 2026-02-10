@@ -6,6 +6,7 @@ import '../../core/widgets/period_selector.dart';
 import '../../core/widgets/status_badge.dart';
 import '../../services/aggregated_data_provider.dart';
 import '../../models/assessment_models.dart';
+import '../../features/settings/presentation/settings_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -73,7 +74,11 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.settings_outlined),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                    );
+                  },
                 ),
               ],
             ),
@@ -115,7 +120,7 @@ class DashboardScreen extends ConsumerWidget {
                   const SizedBox(height: AppStyles.paddingL),
 
                   // System Health Card
-                  _buildHealthCard(data.health),
+                  _buildHealthCard(context, data.health),
                   const SizedBox(height: AppStyles.paddingM),
 
                   // Risk KPIs Grid
@@ -144,7 +149,7 @@ class DashboardScreen extends ConsumerWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: AppStyles.paddingM),
-                  _buildIndicesGrid(data.indices),
+                  _buildIndicesGrid(context, data.indices),
                   const SizedBox(height: AppStyles.paddingL),
 
                   // Active Alerts
@@ -159,7 +164,7 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHealthCard(SystemHealth health) {
+  Widget _buildHealthCard(BuildContext context, SystemHealth health) {
     final color = _getHealthColor(health.overallScore);
     
     return Container(
@@ -239,7 +244,37 @@ class DashboardScreen extends ConsumerWidget {
                         color: AppColors.textSecondary,
                       ),
                     ),
-                    const SizedBox(width: AppStyles.paddingS),
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text('About System Health'),
+                            content: const Text(
+                              'Health score is calculated from:\n\n'
+                              '• Chemistry Quality (35%): Based on water parameters\n'
+                              '• Risk Profile (35%): Worst-case risk among scaling, corrosion, fouling\n'
+                              '• Treatment Effectiveness (20%): Zinc, phosphate, chlorine levels\n'
+                              '• Stability (10%): Consistency of pH and conductivity over time\n\n'
+                              'Score >85 = Excellent\n'
+                              'Score 70-85 = Good\n'
+                              'Score 50-70 = Fair\n'
+                              'Score 30-50 = Poor\n'
+                              'Score <30 = Critical'
+                            ),
+                            actions: [
+                              TextButton(
+                                child: const Text('OK'),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      child: Icon(Icons.info_outline, size: 16, color: AppColors.textMuted),
+                    ),
+                    const Spacer(),
                     StatusBadge(
                       label: health.status,
                       type: _getStatusType(health.overallScore),
@@ -332,7 +367,7 @@ class DashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildIndicesGrid(CalculatedIndices indices) {
+  Widget _buildIndicesGrid(BuildContext context, CalculatedIndices indices) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -341,20 +376,40 @@ class DashboardScreen extends ConsumerWidget {
       crossAxisSpacing: AppStyles.paddingS,
       childAspectRatio: 1.1,
       children: [
-        KPICardCompact(
-          label: 'LSI',
-          value: indices.lsi.toStringAsFixed(2),
-          color: _getIndexColor(indices.lsi),
+        _buildIndexCard(
+          context,
+          'LSI',
+          indices.lsi,
+          _getIndexColor(indices.lsi),
+          'Langelier Saturation Index (LSI)',
+          'Predicts calcium carbonate scaling tendency:\n\n'
+          '• < -0.5: Corrosive\n'
+          '• -0.5 to +0.5: Balanced\n'
+          '• > +0.5: Scaling\n'
+          '• > +2.0: Heavy scaling\n\n'
+          'Note: Temp defaults to 35°C if not measured.',
         ),
-        KPICardCompact(
-          label: 'RSI',
-          value: indices.rsi.toStringAsFixed(2),
-          color: _getIndexColor(indices.rsi - 6), // Center around 6
+        _buildIndexCard(
+          context,
+          'RSI',
+          indices.rsi,
+          _getIndexColor(indices.rsi - 6),
+          'Ryznar Stability Index (RSI)',
+          'Empirical index for scale/corrosion:\n\n'
+          '• < 6.0: Scaling tendency\n'
+          '• 6.0 - 7.0: Little scale or corrosion\n'
+          '• > 7.0: Corrosive tendency\n'
+          '• > 8.0: Heavy corrosion',
         ),
-        KPICardCompact(
-          label: 'PSI',
-          value: indices.psi.toStringAsFixed(2),
-          color: _getIndexColor(indices.psi - 6), // Center around 6
+        _buildIndexCard(
+          context,
+          'PSI',
+          indices.psi,
+          _getIndexColor(indices.psi - 6),
+          'Puckorius Scaling Index (PSI)',
+          'modified version of RSI that accounts for buffering capacity:\n\n'
+          '• < 6.0: Scaling tendency\n'
+          '• > 7.0: Corrosive tendency',
         ),
       ],
     );
@@ -539,5 +594,36 @@ class DashboardScreen extends ConsumerWidget {
     if (value.abs() <= 0.5) return AppColors.success;
     if (value.abs() <= 1.5) return AppColors.warning;
     return AppColors.error;
+  }
+
+  Widget _buildIndexCard(BuildContext context, String label, double value, Color color, String title, String desc) {
+    return InkWell(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: Text(title),
+            content: Text(desc),
+            actions: [
+              TextButton(child: const Text('OK'), onPressed: () => Navigator.pop(context)),
+            ],
+          ),
+        );
+      },
+      child: Stack(
+        children: [
+          KPICardCompact(
+            label: label,
+            value: value.toStringAsFixed(2),
+            color: color,
+          ),
+          Positioned(
+            right: 8,
+            top: 8,
+            child: Icon(Icons.info_outline, size: 14, color: AppColors.textMuted),
+          ),
+        ],
+      ),
+    );
   }
 }

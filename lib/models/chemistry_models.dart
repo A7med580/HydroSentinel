@@ -41,6 +41,8 @@ class CoolingTowerData {
   final WaterParameter zinc;
   final WaterParameter iron;
   final WaterParameter phosphates;
+  final WaterParameter? temperature; // Optional: parsed from Excel or null (engine defaults to 35°C for CT)
+  final WaterParameter? sulfate;     // Optional: if measured, used for Larson-Skold; if null, estimated from chloride
   final DateTime timestamp;
 
   CoolingTowerData({
@@ -52,6 +54,8 @@ class CoolingTowerData {
     required this.zinc,
     required this.iron,
     required this.phosphates,
+    this.temperature,
+    this.sulfate,
     required this.timestamp,
   });
 }

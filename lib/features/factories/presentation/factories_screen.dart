@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_styles.dart';
 import '../../../core/widgets/factory_card.dart';
 import '../domain/factory_entity.dart';
+import '../domain/factory_repository.dart'; // Import SyncSummary
 import 'factory_providers.dart';
 import 'factory_home_screen.dart';
 
@@ -46,20 +47,82 @@ class FactoriesScreen extends ConsumerWidget {
                         final factory = factories[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: AppStyles.paddingM),
-                          child: FactoryCard(
-                            name: factory.name,
-                            status: _getStatusString(factory.status),
-                            lastSyncAt: factory.lastSyncAt,
-                            healthScore: factory.healthScore,
-                            alertCount: factory.alertCount,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => FactoryHomeScreen(factory: factory),
+                          child: Dismissible(
+                            key: Key(factory.id),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: AppStyles.paddingL),
+                              decoration: BoxDecoration(
+                                color: AppColors.error,
+                                borderRadius: BorderRadius.circular(AppStyles.borderRadius),
+                              ),
+                              child: const Icon(Icons.delete_outline, color: Colors.white),
+                            ),
+                            confirmDismiss: (direction) async {
+                              return await showDialog<bool>(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Delete Factory?'),
+                                  content: const Text(
+                                    'Are you sure you want to delete this factory from the app?\n\n'
+                                    'Note: If the factory folder still exists in Google Drive, it will reappear during the next sync.',
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context, false),
+                                      child: const Text('Cancel'),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context, true),
+                                      style: TextButton.styleFrom(foregroundColor: AppColors.error),
+                                      child: const Text('Delete'),
+                                    ),
+                                  ],
                                 ),
                               );
                             },
+                            onDismissed: (direction) async {
+                              // Optimistic update handled by Stream? 
+                              // No, stream will update when DB updates.
+                              // But we need to call delete.
+                              
+                              final result = await ref.read(factoryRepositoryProvider).deleteFactory(factory.id);
+                              
+                              if (context.mounted) {
+                                result.fold(
+                                  (failure) {
+                                    // Verify if we should undo? 
+                                    // If deletion failed, the item is theoretically still there but dismissed from UI?
+                                    // StreamBuilder should handle state, but Dismissible removes it from tree locally?
+                                    // Actually, if stream updates, it rebuilds.
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Failed to delete: ${failure.message}')),
+                                    );
+                                  },
+                                  (_) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('Factory deleted')),
+                                    );
+                                  },
+                                );
+                              }
+                            },
+                            child: FactoryCard(
+                              name: factory.name,
+                              status: _getStatusString(factory.status),
+                              lastSyncAt: factory.lastSyncAt,
+                              healthScore: factory.healthScore,
+                              alertCount: factory.alertCount,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FactoryHomeScreen(factory: factory),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                         );
                       },
@@ -182,6 +245,7 @@ class FactoriesScreen extends ConsumerWidget {
   }
 
   Future<void> _handleSync(BuildContext context, WidgetRef ref) async {
+    // Show loading indicator
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -189,62 +253,129 @@ class FactoriesScreen extends ConsumerWidget {
             SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
             ),
             SizedBox(width: 16),
             Text('Syncing factories...'),
           ],
         ),
-        backgroundColor: AppColors.card,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppStyles.borderRadius),
-        ),
+        duration: const Duration(days: 1), // Indefinite until dismissed
       ),
     );
     
-    try {
-      await ref.read(factoryRepositoryProvider).syncWithDrive();
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    final result = await ref.read(factoryRepositoryProvider).syncWithDrive();
+    
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+    result.fold(
+      (failure) {
+        _showErrorDialog(context, 'Sync Failed', failure.message);
+      },
+      (summary) {
+        _showSyncResultDialog(context, summary);
+      },
+    );
+  }
+
+  void _showErrorDialog(BuildContext context, String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title, style: const TextStyle(color: AppColors.error)),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSyncResultDialog(BuildContext context, SyncSummary summary) {
+    if (summary.processedFiles == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(
-            children: [
-              Icon(Icons.check_circle, color: AppColors.success),
-              SizedBox(width: 12),
-              Text('Sync complete'),
-            ],
-          ),
-          backgroundColor: AppColors.card,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppStyles.borderRadius),
-          ),
-        ),
+        const SnackBar(content: Text('No files found to sync.')),
       );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.error_outline, color: AppColors.error),
-              const SizedBox(width: 12),
-              Expanded(child: Text('Sync failed: $e')),
-            ],
-          ),
-          backgroundColor: AppColors.card,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppStyles.borderRadius),
-          ),
-        ),
-      );
+      return;
     }
+
+    final hasErrors = summary.failureCount > 0;
+    final hasMissingData = summary.missingDataFiles.isNotEmpty;
+    final isPerfect = !hasErrors && !hasMissingData;
+
+    if (isPerfect) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Synced ${summary.successCount} files successfully.'),
+          backgroundColor: AppColors.success,
+        ),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              hasErrors ? Icons.warning_amber : Icons.info_outline,
+              color: hasErrors ? AppColors.error : AppColors.primary,
+            ),
+            const SizedBox(width: 8),
+            const Text('Sync Results'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Processed: ${summary.processedFiles}'),
+              Text('Success: ${summary.successCount}', style: const TextStyle(color: AppColors.success)),
+              if (hasErrors)
+                Text('Failed: ${summary.failureCount}', style: const TextStyle(color: AppColors.error)),
+              
+              if (hasMissingData) ...[
+                const SizedBox(height: 16),
+                const Text('Missing Data Detected:', style: TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 4),
+                ...summary.missingDataFiles.entries.map((e) => 
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text('• ${e.key}: Missing ${e.value.join(", ")}', style: const TextStyle(fontSize: 12)),
+                  )
+                ).take(5), // Limit to 5 to avoid overflow
+                if (summary.missingDataFiles.length > 5)
+                  Text('+ ${summary.missingDataFiles.length - 5} more files...'),
+              ],
+
+              if (hasErrors && summary.errorMessages.isNotEmpty) ...[
+                 const SizedBox(height: 16),
+                 const Text('Errors:', style: TextStyle(fontWeight: FontWeight.bold)),
+                 const SizedBox(height: 4),
+                 ...summary.errorMessages.map((e) => 
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text('• $e', style: const TextStyle(fontSize: 12, color: AppColors.error)),
+                    )
+                 ).take(5),
+                 if (summary.errorMessages.length > 5)
+                    Text('+ ${summary.errorMessages.length - 5} more errors...'),
+              ]
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 }

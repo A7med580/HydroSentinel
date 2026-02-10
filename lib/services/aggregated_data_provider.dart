@@ -70,10 +70,10 @@ Future<AggregatedData?> _fetchAggregatedData(String factoryId, TimePeriod period
       startDate = now.subtract(const Duration(days: 7));
       break;
     case TimePeriod.month:
-      startDate = DateTime(now.year, now.month - 1, now.day);
+      startDate = now.subtract(const Duration(days: 30));
       break;
     case TimePeriod.year:
-      startDate = DateTime(now.year - 1, now.month, now.day);
+      startDate = now.subtract(const Duration(days: 365));
       break;
   }
   
@@ -119,17 +119,17 @@ Future<AggregatedData?> _fetchAggregatedData(String factoryId, TimePeriod period
     // Calculate indices for THIS day
     final indices = CalculationEngine.calculateIndices(ctData);
     
-    // Calculate risk for THIS day
-    final risk = CalculationEngine.assessRisk(indices, ctData);
-    
-    // Build RO data if available for THIS day
+    // Calculate risk for THIS day (pass roData for silica fouling — Task 1.4)
     ROData? roData = _buildRODataFromMeasurement(m);
+    final risk = CalculationEngine.assessRisk(indices, ctData, roData: roData);
+    
+    // Build RO assessment
     ROProtectionAssessment? roAssessment = roData != null 
         ? CalculationEngine.assessRO(roData) 
         : null;
     
-    // Calculate health for THIS day
-    final health = CalculationEngine.calculateHealth(risk, roAssessment);
+    // Calculate health for THIS day (Task 1.5: pass ctData for treatment score)
+    final health = CalculationEngine.calculateHealth(risk, roAssessment, ctData: ctData, roData: roData);
     
     dailyCalculations.add(DailyCalculation(
       date: m.startDate,
@@ -155,8 +155,19 @@ Future<AggregatedData?> _fetchAggregatedData(String factoryId, TimePeriod period
   final avgRoData = _averageRoData(dailyCalculations);
   final avgRoAssessment = _averageRoAssessment(dailyCalculations);
   
+  // Collect historical pH and conductivity for stability scoring (Task 1.5)
+  final historicalPh = dailyCalculations.map((d) => d.ctData.ph.value).toList();
+  final historicalCond = dailyCalculations.map((d) => d.ctData.conductivity.value).toList();
+  
+  // Re-calculate average health WITH stability data
+  final avgHealthWithStability = CalculationEngine.calculateHealth(
+    avgRisk, avgRoAssessment,
+    ctData: avgCtData, roData: avgRoData,
+    historicalPh: historicalPh, historicalConductivity: historicalCond,
+  );
+  
   // Generate recommendations based on AVERAGE risk
-  final recommendations = CalculationEngine.generateRecommendations(avgRisk, avgHealth, avgRoData);
+  final recommendations = CalculationEngine.generateRecommendations(avgRisk, avgHealthWithStability, avgRoData, ctData: avgCtData, indices: avgIndices);
   
   print('DEBUG: [Period ${period.name}] Avg Health=${avgHealth.overallScore.toStringAsFixed(1)} from ${dailyCalculations.length} days');
   
@@ -166,7 +177,7 @@ Future<AggregatedData?> _fetchAggregatedData(String factoryId, TimePeriod period
     indices: avgIndices,
     risk: avgRisk,
     roAssessment: avgRoAssessment,
-    health: avgHealth,
+    health: avgHealthWithStability,
     recommendations: recommendations,
     measurementCount: dailyCalculations.length,
     dateRange: DateRange(startDate, DateTime.now()),
@@ -184,6 +195,18 @@ CoolingTowerData _buildCTDataFromMeasurement(MeasurementV2 m) {
     return 0.0;
   }
   
+  // Build optional temperature and sulfate from measurement data
+  WaterParameter? tempParam;
+  final tempVal = m.data['temperature'];
+  if (tempVal is num && tempVal > 0) {
+    tempParam = WaterParameter(name: 'Temperature', value: tempVal.toDouble(), unit: '°C', optimalMin: 20, optimalMax: 45);
+  }
+  WaterParameter? sulfateParam;
+  final sulfateVal = m.data['sulfate'];
+  if (sulfateVal is num && sulfateVal > 0) {
+    sulfateParam = WaterParameter(name: 'Sulfate', value: sulfateVal.toDouble(), unit: 'ppm', optimalMin: 0, optimalMax: 500);
+  }
+
   return CoolingTowerData(
     ph: WaterParameter(
       name: 'pH', value: val('ph'), unit: 'pH',
@@ -225,6 +248,8 @@ CoolingTowerData _buildCTDataFromMeasurement(MeasurementV2 m) {
       optimalMin: 5, optimalMax: 15,
       quality: CalculationEngine.validateParameter(val('phosphates'), 5, 15),
     ),
+    temperature: tempParam,
+    sulfate: sulfateParam,
     timestamp: m.startDate,
   );
 }
@@ -331,12 +356,13 @@ RiskLevel _getRiskLevel(double score) {
   return RiskLevel.critical;
 }
 
-/// Average daily indices
+/// Average daily indices (handles nullable stiffDavis and larsonSkold)
 CalculatedIndices _averageIndices(List<DailyCalculation> days) {
   if (days.isEmpty) {
     return CalculatedIndices(
-      lsi: 0, rsi: 0, psi: 0, stiffDavis: 0, larsonSkold: 0,
+      lsi: 0, rsi: 0, psi: 0,
       coc: 0, adjustedPsi: 0, tdsEstimation: 0, chlorideSulfateRatio: 0,
+      usedTemperature: 35.0, sulfateEstimated: true,
       timestamp: DateTime.now(),
     );
   }
@@ -344,16 +370,25 @@ CalculatedIndices _averageIndices(List<DailyCalculation> days) {
   double avg(double Function(DailyCalculation) selector) =>
       days.map(selector).reduce((a, b) => a + b) / days.length;
   
+  // Nullable averages: only average days where value exists
+  double? avgNullable(double? Function(DailyCalculation) selector) {
+    final values = days.map(selector).whereType<double>().toList();
+    if (values.isEmpty) return null;
+    return values.reduce((a, b) => a + b) / values.length;
+  }
+  
   return CalculatedIndices(
     lsi: avg((d) => d.indices.lsi),
     rsi: avg((d) => d.indices.rsi),
     psi: avg((d) => d.indices.psi),
-    stiffDavis: avg((d) => d.indices.stiffDavis),
-    larsonSkold: avg((d) => d.indices.larsonSkold),
+    stiffDavis: avgNullable((d) => d.indices.stiffDavis),
+    larsonSkold: avgNullable((d) => d.indices.larsonSkold),
     coc: avg((d) => d.indices.coc),
     adjustedPsi: avg((d) => d.indices.adjustedPsi),
     tdsEstimation: avg((d) => d.indices.tdsEstimation),
     chlorideSulfateRatio: avg((d) => d.indices.chlorideSulfateRatio),
+    usedTemperature: avg((d) => d.indices.usedTemperature),
+    sulfateEstimated: days.any((d) => d.indices.sulfateEstimated),
     timestamp: DateTime.now(),
   );
 }
@@ -361,7 +396,18 @@ CalculatedIndices _averageIndices(List<DailyCalculation> days) {
 /// Average CT data (for display purposes)
 CoolingTowerData _averageCtData(List<DailyCalculation> days) {
   if (days.isEmpty) {
-    return days.first.ctData; // Shouldn't happen
+    // Return safe default values instead of crashing
+    return CoolingTowerData(
+      ph: WaterParameter(name: 'pH', value: 0, unit: 'pH', optimalMin: 7.0, optimalMax: 8.5),
+      alkalinity: WaterParameter(name: 'Alkalinity', value: 0, unit: 'ppm', optimalMin: 100, optimalMax: 500),
+      conductivity: WaterParameter(name: 'Conductivity', value: 0, unit: 'µS/cm', optimalMin: 500, optimalMax: 3000),
+      totalHardness: WaterParameter(name: 'Total Hardness', value: 0, unit: 'ppm', optimalMin: 50, optimalMax: 400),
+      chloride: WaterParameter(name: 'Chloride', value: 0, unit: 'ppm', optimalMin: 0, optimalMax: 250),
+      zinc: WaterParameter(name: 'Zinc', value: 0, unit: 'ppm', optimalMin: 0.5, optimalMax: 2.0),
+      iron: WaterParameter(name: 'Iron', value: 0, unit: 'ppm', optimalMin: 0, optimalMax: 0.5),
+      phosphates: WaterParameter(name: 'Phosphates', value: 0, unit: 'ppm', optimalMin: 5, optimalMax: 15),
+      timestamp: DateTime.now(),
+    );
   }
   
   double avg(double Function(DailyCalculation) selector) =>

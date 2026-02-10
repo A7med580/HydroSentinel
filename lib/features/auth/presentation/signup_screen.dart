@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/app_styles.dart';
 import '../../../core/navigation/main_navigation.dart';
 import 'auth_providers.dart';
+import 'email_verification_screen.dart';
 import '../../dashboard/dashboard_screen.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
@@ -58,11 +59,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       },
       (user) {
         if (mounted) {
-          // Navigate to main app or show success
-          // Usually auto-login happens, or we might need to verify email
-          // For now, assume auto-login or redirect
+          // Navigate to email verification screen to enforce safety (Task 3.1)
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (_) => const MainNavigation()),
+            MaterialPageRoute(builder: (_) => const EmailVerificationScreen()),
             (route) => false,
           );
         }

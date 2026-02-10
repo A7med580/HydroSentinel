@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/app_styles.dart';
-import '../../services/state_provider.dart';
+import '../../services/aggregated_data_provider.dart';
 import '../../models/assessment_models.dart';
 
 class AlertsScreen extends ConsumerWidget {
@@ -9,20 +9,39 @@ class AlertsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(systemProvider);
+    final asyncData = ref.watch(aggregatedDataProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('ALERTS & RECOMMENDATIONS')),
-      body: state.recommendations.isEmpty
-          ? const Center(child: Text('No active alerts. System is stable.'))
-          : ListView.builder(
-              padding: const EdgeInsets.all(AppStyles.paddingM),
-              itemCount: state.recommendations.length,
-              itemBuilder: (context, index) {
-                final rec = state.recommendations[index];
-                return _buildRecommendationCard(rec);
-              },
-            ),
+      body: asyncData.when(
+        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+        data: (data) {
+          if (data == null || data.recommendations.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.check_circle_outline, size: 64, color: Colors.green.shade400),
+                  const SizedBox(height: 16),
+                  const Text('No active alerts', style: TextStyle(fontSize: 18, color: AppColors.textSecondary)),
+                  const SizedBox(height: 8),
+                  const Text('System is stable', style: TextStyle(fontSize: 14, color: AppColors.textMuted)),
+                ],
+              ),
+            );
+          }
+          
+          return ListView.builder(
+            padding: const EdgeInsets.all(AppStyles.paddingM),
+            itemCount: data.recommendations.length,
+            itemBuilder: (context, index) {
+              final rec = data.recommendations[index];
+              return _buildRecommendationCard(rec);
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -58,11 +77,14 @@ class AlertsScreen extends ConsumerWidget {
               ),
             ),
           ),
+          
+          // WHY Explanation section
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppStyles.paddingM),
             child: Text(rec.description, style: const TextStyle(fontSize: 14)),
           ),
           const SizedBox(height: AppStyles.paddingM),
+          
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: AppStyles.paddingM),
             child: Text('REQUIRED ACTIONS:', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),

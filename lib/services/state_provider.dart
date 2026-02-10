@@ -64,7 +64,7 @@ class SystemNotifier extends Notifier<SystemState> {
 
     if (ct != null) {
       indices = CalculationEngine.calculateIndices(ct);
-      risk = CalculationEngine.assessRisk(indices, ct);
+      risk = CalculationEngine.assessRisk(indices, ct, roData: ro);
     }
 
     if (ro != null) {
@@ -72,8 +72,8 @@ class SystemNotifier extends Notifier<SystemState> {
     }
 
     if (risk != null) {
-      health = CalculationEngine.calculateHealth(risk, roAss);
-      recs = CalculationEngine.generateRecommendations(risk, health, ro);
+      health = CalculationEngine.calculateHealth(risk, roAss, ctData: ct, roData: ro);
+      recs = CalculationEngine.generateRecommendations(risk, health, ro, ctData: ct, indices: indices);
     }
 
     state = state.copyWith(
@@ -109,10 +109,10 @@ class SystemNotifier extends Notifier<SystemState> {
     );
 
     final indices = CalculationEngine.calculateIndices(ct);
-    final risk = CalculationEngine.assessRisk(indices, ct);
+    final risk = CalculationEngine.assessRisk(indices, ct, roData: ro);
     final roAss = CalculationEngine.assessRO(ro);
-    final health = CalculationEngine.calculateHealth(risk, roAss);
-    final recs = CalculationEngine.generateRecommendations(risk, health, ro);
+    final health = CalculationEngine.calculateHealth(risk, roAss, ctData: ct, roData: ro);
+    final recs = CalculationEngine.generateRecommendations(risk, health, ro, ctData: ct, indices: indices);
 
     return SystemState(
       coolingTowerData: ct,

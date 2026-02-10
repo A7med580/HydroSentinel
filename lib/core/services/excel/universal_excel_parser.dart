@@ -13,14 +13,15 @@ class UniversalExcelParser {
   
   /// Parse Excel bytes and return ALL measurements (not just first row)
   static Future<Map<String, dynamic>> parse(List<int> bytes) async {
-    var excel = Excel.decodeBytes(bytes);
+    try {
+      var excel = Excel.decodeBytes(bytes);
     
     // 1. Find the best sheet (usually 'Entry' or first visible)
     Sheet? sheet = excel.tables['Entry'];
     if (sheet == null) {
       // Fallback to first non-empty sheet
       for (var table in excel.tables.keys) {
-        if (excel.tables[table]!.maxRows > 0) {
+        if ((excel.tables[table]?.maxRows ?? 0) > 0) {
           sheet = excel.tables[table];
           break;
         }
@@ -71,6 +72,22 @@ class UniversalExcelParser {
     CoolingTowerData? latestCT = allCTData.isNotEmpty ? allCTData.last : null;
     ROData? latestRO = allROData.isNotEmpty ? allROData.last : null;
 
+    // NEW: Collect validation metadata for missing data handling
+    final List<String> missingParams = [];
+    final List<int> rowsWithIssues = [];
+    final requiredKeys = [ExcelSchema.ph, ExcelSchema.alkalinity, ExcelSchema.conductivity, 
+                          ExcelSchema.hardness, ExcelSchema.chloride, ExcelSchema.date];
+    
+    for (int i = 0; i < normalizedRows.length; i++) {
+      final row = normalizedRows[i];
+      for (final key in requiredKeys) {
+        if (!row.containsKey(key) || row[key] == null) {
+          if (!missingParams.contains(key)) missingParams.add(key);
+          if (!rowsWithIssues.contains(i)) rowsWithIssues.add(i);
+        }
+      }
+    }
+
     return {
       // NEW: All measurements for multi-row support
       'allCTData': allCTData,
@@ -78,7 +95,14 @@ class UniversalExcelParser {
       // BACKWARD COMPAT: Single values (latest measurement)
       'coolingTower': latestCT,
       'ro': latestRO,
+      // NEW: Validation metadata for missing data handling
+      'missingParameters': missingParams,
     };
+    } catch (e, stack) {
+      print('ERROR: [UniversalParser] Fatal Parse Error: $e');
+      print(stack);
+      rethrow;
+    }
   }
 
   static Map<String, dynamic> _mapToDomain(Map<String, dynamic> row) {
@@ -94,6 +118,22 @@ class UniversalExcelParser {
     }
     
     // Cooling Tower
+    // Optional: temperature (Task 1.1) and sulfate (Task 1.3)
+    WaterParameter? tempParam;
+    if (row.containsKey(ExcelSchema.temperature) && row[ExcelSchema.temperature] != null) {
+      final tempVal = val(ExcelSchema.temperature);
+      if (tempVal >= 5 && tempVal <= 60) {
+        tempParam = _createParam('Temp', tempVal, '°C', 20, 45);
+      }
+    }
+    WaterParameter? sulfateParam;
+    if (row.containsKey(ExcelSchema.sulfate) && row[ExcelSchema.sulfate] != null) {
+      final sulfateVal = val(ExcelSchema.sulfate);
+      if (sulfateVal >= 0) {
+        sulfateParam = _createParam('SO4', sulfateVal, 'ppm', 0, 500);
+      }
+    }
+
     final ctData = CoolingTowerData(
       ph: _createParam('pH', val(ExcelSchema.ph), 'pH', 7.0, 8.5),
       alkalinity: _createParam('Alk', val(ExcelSchema.alkalinity), 'ppm', 100, 500),
@@ -103,6 +143,8 @@ class UniversalExcelParser {
       zinc: _createParam('Zn', val(ExcelSchema.zinc), 'ppm', 0.5, 2.0),
       iron: _createParam('Fe', val(ExcelSchema.iron), 'ppm', 0, 0.5),
       phosphates: _createParam('PO4', val(ExcelSchema.phosphate), 'ppm', 5, 15),
+      temperature: tempParam,
+      sulfate: sulfateParam,
       timestamp: date,
     );
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:excel/excel.dart';
+import 'package:flutter/foundation.dart';
 import '../models/chemistry_models.dart';
 import 'calculation_engine.dart';
 
@@ -20,22 +21,32 @@ class ExcelService {
     
     // Fallback to 'Sheet1' if 'Entry' is missing
     if (entrySheet == null) {
-      print('DEBUG: "Entry" sheet not found. Available sheets: ${excel.tables.keys.toList()}');
+      if (kDebugMode) {
+        print('DEBUG: "Entry" sheet not found. Available sheets: ${excel.tables.keys.toList()}');
+      }
       if (excel.tables.containsKey('Sheet1')) {
         entrySheet = excel.tables['Sheet1'];
-        print('DEBUG: Using "Sheet1" instead.');
+        if (kDebugMode) {
+          print('DEBUG: Using "Sheet1" instead.');
+        }
       }
     }
 
     if (entrySheet != null) {
       // 1. Safe debug dump
-      print('DEBUG: --- EXCEL CONTENT DUMP ---');
+      if (kDebugMode) {
+        print('DEBUG: --- EXCEL CONTENT DUMP ---');
+      }
       final rows = entrySheet.rows;
       for (int i = 0; i < rows.length && i < 5; i++) {
          final row = rows[i];
-         print('Row $i: ${row.map((e) => e?.value).toList()}');
+         if (kDebugMode) {
+           print('Row $i: ${row.map((e) => e?.value).toList()}');
+         }
       }
-      print('DEBUG: --------------------------');
+      if (kDebugMode) {
+        print('DEBUG: --------------------------');
+      }
 
       // 2. Helper to find value by keywords (Smart Parse)
       double getValue(List<String> keywords) {
@@ -62,9 +73,13 @@ class ExcelService {
         return 0.0;
       }
 
-      print('DEBUG: Running Smart Parser...');
+      if (kDebugMode) {
+        print('DEBUG: Running Smart Parser...');
+      }
       if (entrySheet == null) {
-         print('DEBUG: CRITICAL ERROR: entrySheet is null before Smart Parser loop');
+         if (kDebugMode) {
+           print('DEBUG: CRITICAL ERROR: entrySheet is null before Smart Parser loop');
+         }
       }
       
       // Extract Date
@@ -98,7 +113,9 @@ class ExcelService {
            break; 
         }
       }
-      print('DEBUG: Detected Report Date: $reportDate');
+      if (kDebugMode) {
+        print('DEBUG: Detected Report Date: $reportDate');
+      }
 
       var ph = getValue(['pH', 'ph value']);
       var alk = getValue(['alkalinity', 'm-alk', 'total alk']);
@@ -111,7 +128,9 @@ class ExcelService {
 
       // 3. Fallback: Strict Row 1 Parser
       if (ph <= 0 && entrySheet.rows.length > 1) {
-         print('DEBUG: Smart Parser failed (pH=0). Falling back to Strict Row 1 Parser...');
+         if (kDebugMode) {
+           print('DEBUG: Smart Parser failed (pH=0). Falling back to Strict Row 1 Parser...');
+         }
          final row = entrySheet.rows[1]; 
          if (row.length > 8) {
             ph = double.tryParse(row[1]?.value?.toString() ?? '0') ?? 0;
@@ -184,7 +203,9 @@ class ExcelService {
         ),
         timestamp: reportDate,
       );
-      print('DEBUG: Final Parse Result - pH: ${coolingTowerData.ph.value}, Alk: ${coolingTowerData.alkalinity.value}');
+      if (kDebugMode) {
+        print('DEBUG: Final Parse Result - pH: ${coolingTowerData.ph.value}, Alk: ${coolingTowerData.alkalinity.value}');
+      }
     }
 
     // Parse RO sheet

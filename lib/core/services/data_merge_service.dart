@@ -33,24 +33,29 @@ class DataMergeService {
     
     final factoryId = measurements.first.factoryId;
     
-    // Chunk size to avoid URL length limits
-    const int chunkSize = 100;
+    // Chunk size: Safer batch size for network requests
+    const int startChunkSize = 20; 
     
     // Process in chunks
-    for (var i = 0; i < measurements.length; i += chunkSize) {
-      final end = (i + chunkSize < measurements.length) ? i + chunkSize : measurements.length;
+    for (var i = 0; i < measurements.length; i += startChunkSize) {
+      final end = (i + startChunkSize < measurements.length) ? i + startChunkSize : measurements.length;
       final chunk = measurements.sublist(i, end);
       
-      final dates = chunk.map((m) => m.startDate.toIso8601String().substring(0, 10)).toList();
       final records = chunk.map((m) => m.toJson()).toList();
       
       try {
         // 1. Delete existing collisions (Latest Wins Rule)
-        await _supabase.from('measurements_v2')
+        // We use Future.wait to parallelize individual deletes, which is safer than a massive 'in' clause
+        // but still reasonably fast for small batches (20 items).
+        // A stored procedure would be better, but we are restricted to client-side changes.
+        final deleteFutures = chunk.map((m) =>
+            _supabase.from('measurements_v2')
             .delete()
             .eq('factory_id', factoryId)
             .eq('period_type', periodType.name)
-            .filter('start_date', 'in', '(${dates.join(',')})');
+            .eq('start_date', m.startDate.toIso8601String())
+        );
+        await Future.wait(deleteFutures);
             
         // 2. Insert New
         await _supabase.from('measurements_v2').insert(records);
@@ -58,8 +63,6 @@ class DataMergeService {
         print('Merged ${chunk.length} ${periodType.name} records for factory $factoryId');
       } catch (e) {
         print('Error merging chunk for $periodType: $e');
-        // Continue with next chunk or rethrow?
-        // Rethrowing is safer to alert user of partial failure
         rethrow;
       }
     }

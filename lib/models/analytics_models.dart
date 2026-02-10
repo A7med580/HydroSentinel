@@ -69,6 +69,8 @@ class WaterMeasurement {
       stiffDavis: map['stiff_davis'] ?? 0.0,
       adjustedPsi: map['adjusted_psi'] ?? 0.0,
       chlorideSulfateRatio: map['chloride_sulfate_ratio'] ?? 0.0,
+      sulfateEstimated: map['sulfate_estimated'] ?? true, // Default to true for legacy data
+      usedTemperature: map['used_temperature'] ?? 35.0, // Default to 35.0 for legacy data
       timestamp: DateTime.parse(map['measurement_date']),
     );
 

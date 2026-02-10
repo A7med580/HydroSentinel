@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter/foundation.dart';
+import '../../auth/domain/user_entity.dart';
 import '../../../core/failures.dart';
 
 class StorageService {
@@ -13,18 +15,28 @@ class StorageService {
     try {
       final emailPrefix = email.split('@')[0];
       final userPath = 'user_$emailPrefix';
-      print('DEBUG: [Root Check] Listing ALL items in bucket root...');
+      if (kDebugMode) {
+        print('DEBUG: [Root Check] Listing ALL items in bucket root...');
+      }
       try {
         final rootItems = await _client.storage.from('factories').list();
-        print('DEBUG: [Root Check] Found ${rootItems.length} items at root:');
+        if (kDebugMode) {
+          print('DEBUG: [Root Check] Found ${rootItems.length} items at root:');
+        }
         for (var i in rootItems) {
-           print('DEBUG: - ${i.name} (id: ${i.id}, metadata: ${i.metadata})');
+           if (kDebugMode) {
+             print('DEBUG: - ${i.name} (id: ${i.id}, metadata: ${i.metadata})');
+           }
         }
       } catch(e) {
-        print('DEBUG: [Root Check] Failed: $e');
+        if (kDebugMode) {
+          print('DEBUG: [Root Check] Failed: $e');
+        }
       }
 
-      print('DEBUG: Listing factories for path: $userPath');
+      if (kDebugMode) {
+        print('DEBUG: Listing factories for path: $userPath');
+      }
       final List<FileObject> objects = await _client.storage.from('factories').list(path: userPath);
       print('DEBUG: Found ${objects.length} objects in $userPath');
       for (var o in objects) {

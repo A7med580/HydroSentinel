@@ -1,10 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hydrosentinel/models/assessment_models.dart' as am;
-import 'package:hydrosentinel/models/chemistry_models.dart';
-import 'package:hydrosentinel/services/calculation_engine.dart';
-import 'factory_providers.dart';
-import 'package:hydrosentinel/features/factories/domain/report_entity.dart';
-import 'dart:convert';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../models/assessment_models.dart' as am;
+import '../../../models/chemistry_models.dart';
+import '../../../services/calculation_engine.dart';
+// import 'factory_providers.dart'; // Deprecated V1 provider
+// import '../domain/report_entity.dart'; // Deprecated V1 entity
 
 /// Replicates the generic SystemState but scoped to a single Factory
 class FactorySystemState {
@@ -13,6 +13,7 @@ class FactorySystemState {
   final am.RiskAssessment? riskAssessment;
   final am.ROProtectionAssessment? roAssessment;
   final CoolingTowerData? coolingTowerData;
+  final ROData? roData;
   final List<am.Recommendation> recommendations;
 
   FactorySystemState({
@@ -21,6 +22,7 @@ class FactorySystemState {
     this.riskAssessment,
     this.roAssessment,
     this.coolingTowerData,
+    this.roData,
     this.recommendations = const [],
   });
 
@@ -29,128 +31,119 @@ class FactorySystemState {
   factory FactorySystemState.empty() => FactorySystemState(isLoading: false);
 }
 
-/// Computes the System State for a specific factory based on its latest report
-final factoryStateProvider = Provider.family<AsyncValue<FactorySystemState>, String>((ref, factoryId) {
-  final reportsAsync = ref.watch(factoryReportsProvider(factoryId));
+/// Computes the System State for a specific factory based on its latest V2 measurement
+/// Replaces the legacy V1 'reports' table based implementation.
+final factoryStateProvider = StreamProvider.family<FactorySystemState, String>((ref, factoryId) {
+  // Query measurements_v2 directly via Supabase stream
+  // This ensures real-time updates when new data is merged
+  return Supabase.instance.client
+      .from('measurements_v2')
+      .stream(primaryKey: ['id'])
+      .eq('factory_id', factoryId)
+      .order('start_date', ascending: false)
+      .limit(1)
+      .map((List<Map<String, dynamic>> data) {
+        if (data.isEmpty) {
+          return FactorySystemState.empty();
+        }
 
-  return reportsAsync.whenData((reports) {
-    if (reports.isEmpty) {
-      return FactorySystemState.empty();
-    }
+        final latestMeasurement = data.first;
+        final measurementData = latestMeasurement['data'] as Map<String, dynamic>? ?? {};
+        final startDate = DateTime.parse(latestMeasurement['start_date']);
 
-    // Use the latest report (reports are already ordered by analyzed_at desc in repo)
-    final latestReport = reports.first;
+        // 1. Reconstruct Cooling Tower Data
+        // Helper function to safely extract double
+        double val(String key) {
+          final v = measurementData[key];
+          if (v is num) return v.toDouble();
+          if (v is String) return double.tryParse(v) ?? 0.0;
+          return 0.0;
+        }
 
-    // Parse data from the report 'data' JSON
-    // The report.data['cooling_tower'] is a string representation of the object (toString()), 
-    // which is NOT ideal for parsing. Ideally we should have stored JSON.
-    // However, looking at FactoryRepositoryImpl:
-    // 'cooling_tower': ctData?.toString(), 
+        // Helper to validate parameter
+        DataQuality check(double val, double min, double max) {
+          return CalculationEngine.validateParameter(val, min, max);
+        }
 
-    // CRITICAL: We need to reconstruct the Models from the raw values stored in Top-Level Report Fields
-    // OR we need to improve how we store data. 
-    // Currently ReportEntity stores 'risk_scaling', 'risk_corrosion' directly.
-    // But Dashboard needs `CoolingTowerData` to run `calculateIndices` if we want full fidelity.
-    
-    // WORKAROUND: We will reconstruct partial data from the specific risk scores we saved,
-    // OR we rely on what we have. 
-    // Since `CalculationEngine` requires `CoolingTowerData`, we might be blocked if we didn't save the raw parameters (pH, Conductivity etc) to DB.
-    // Let's check `FactoryRepositoryImpl` again. It saves `risk_scaling`, `risk_corrosion` etc.
-    // But `SystemState` needs `RiskAssessment` object.
-    
-    // We can reconstruct a RiskAssessment object directly from the saved scores!
-    // We don't need to re-run calculation engine if we trust the saved scores.
-    
-    // Parse Cooling Tower Data first
-    CoolingTowerData? ctData;
-    if (latestReport.data['cooling_tower'] != null && latestReport.data['cooling_tower'] is Map) {
-      try {
-        final Map<String, dynamic> json = latestReport.data['cooling_tower'];
-        ctData = CoolingTowerData(
-          ph: WaterParameter(name: 'pH', value: (json['pH']['value'] as num).toDouble(), unit: 'pH'),
-          alkalinity: WaterParameter(name: 'Total Alkalinity', value: (json['Alkalinity']['value'] as num).toDouble(), unit: 'ppm'),
-          conductivity: WaterParameter(name: 'Conductivity', value: (json['Conductivity']['value'] as num).toDouble(), unit: 'µS/cm'),
-          totalHardness: WaterParameter(name: 'Total Hardness', value: (json['Total Hardness']['value'] as num).toDouble(), unit: 'ppm'),
-          chloride: WaterParameter(name: 'Chloride', value: (json['Chloride']['value'] as num).toDouble(), unit: 'ppm'),
-          zinc: WaterParameter(name: 'Zinc', value: (json['Zinc']['value'] as num).toDouble(), unit: 'ppm'),
-          iron: WaterParameter(name: 'Iron', value: (json['Iron']['value'] as num).toDouble(), unit: 'ppm'),
-          phosphates: WaterParameter(name: 'Phosphates', value: (json['Phosphates']['value'] as num).toDouble(), unit: 'ppm'),
-          timestamp: DateTime.parse(json['timestamp']),
+        final ctData = CoolingTowerData(
+          ph: WaterParameter(
+            name: 'pH', value: val('ph'), unit: 'pH', 
+            optimalMin: 7.0, optimalMax: 8.5, quality: check(val('ph'), 7.0, 8.5)),
+          alkalinity: WaterParameter(
+            name: 'Alkalinity', value: val('alkalinity'), unit: 'ppm', 
+            optimalMin: 100, optimalMax: 500, quality: check(val('alkalinity'), 100, 500)),
+          conductivity: WaterParameter(
+            name: 'Conductivity', value: val('conductivity'), unit: 'µS/cm', 
+            optimalMin: 500, optimalMax: 3000, quality: check(val('conductivity'), 500, 3000)),
+          totalHardness: WaterParameter(
+            name: 'Total Hardness', value: val('hardness'), unit: 'ppm', 
+            optimalMin: 50, optimalMax: 400, quality: check(val('hardness'), 50, 400)),
+          chloride: WaterParameter(
+            name: 'Chloride', value: val('chloride'), unit: 'ppm', 
+            optimalMin: 0, optimalMax: 250, quality: check(val('chloride'), 0, 250)),
+          zinc: WaterParameter(
+            name: 'Zinc', value: val('zinc'), unit: 'ppm', 
+            optimalMin: 0.5, optimalMax: 2.0, quality: check(val('zinc'), 0.5, 2.0)),
+          iron: WaterParameter(
+            name: 'Iron', value: val('iron'), unit: 'ppm', 
+            optimalMin: 0, optimalMax: 0.5, quality: check(val('iron'), 0, 0.5)),
+          phosphates: WaterParameter(
+            name: 'Phosphates', value: val('phosphates'), unit: 'ppm', 
+            optimalMin: 5, optimalMax: 15, quality: check(val('phosphates'), 5, 15)),
+          
+          // Optional params (Phase 1)
+          temperature: (measurementData['temperature'] is num && (measurementData['temperature'] as num) > 0)
+              ? WaterParameter(name: 'Temperature', value: (measurementData['temperature'] as num).toDouble(), unit: '°C', optimalMin: 20, optimalMax: 45)
+              : null,
+          sulfate: (measurementData['sulfate'] is num && (measurementData['sulfate'] as num) > 0)
+              ? WaterParameter(name: 'Sulfate', value: (measurementData['sulfate'] as num).toDouble(), unit: 'ppm', optimalMin: 0, optimalMax: 500)
+              : null,
+          
+          timestamp: startDate,
         );
-      } catch (e) {
-        print('Error parsing factory CT data: $e');
-      }
-    }
 
-    // Parse RO Data if available
-    ROData? roData;
-    if (latestReport.data['reverse_osmosis'] != null && latestReport.data['reverse_osmosis'] is Map) {
-      try {
-        final Map<String, dynamic> json = latestReport.data['reverse_osmosis'];
-        roData = ROData(
-          freeChlorine: WaterParameter(name: 'Free Chlorine', value: (json['Free Chlorine']['value'] as num).toDouble(), unit: 'ppm'),
-          silica: WaterParameter(name: 'Silica', value: (json['Silica']['value'] as num).toDouble(), unit: 'ppm'),
-          roConductivity: WaterParameter(name: 'RO Conductivity', value: (json['RO Conductivity']['value'] as num).toDouble(), unit: 'µS/cm'),
-          timestamp: DateTime.parse(json['timestamp']),
-        );
-      } catch (e) {
-        print('Error parsing factory RO data: $e');
-      }
-    }
+        // 2. Reconstruct RO Data (if available)
+        ROData? roData;
+        if (measurementData.containsKey('free_chlorine') || measurementData.containsKey('silica')) {
+          roData = ROData(
+            freeChlorine: WaterParameter(
+              name: 'Free Chlorine', value: val('free_chlorine'), unit: 'ppm', 
+              optimalMin: 0, optimalMax: 0.1, quality: check(val('free_chlorine'), 0, 0.1)),
+            silica: WaterParameter(
+              name: 'Silica', value: val('silica'), unit: 'ppm', 
+              optimalMin: 0, optimalMax: 150, quality: check(val('silica'), 0, 150)),
+            roConductivity: WaterParameter(
+              name: 'RO Conductivity', value: val('ro_conductivity'), unit: 'µS/cm', 
+              optimalMin: 0, optimalMax: 50, quality: check(val('ro_conductivity'), 0, 50)),
+            timestamp: startDate,
+          );
+        }
 
-    // RECALCULATE Risk & Health Live (Don't trust DB columns which might be old)
-    am.RiskAssessment? riskAssessment;
-    am.ROProtectionAssessment? roAssessment;
-    am.SystemHealth? systemHealth;
-    
-    if (ctData != null) {
-       final indices = CalculationEngine.calculateIndices(ctData);
-       riskAssessment = CalculationEngine.assessRisk(indices, ctData);
-       
-       if (roData != null) {
+        // 3. Run Calculation Engine (Live)
+        // We recalculate instead of trusting the DB indices column to ensure we use the LATEST logic 
+        // (including all Phase 1 scientific fixes)
+        final indices = CalculationEngine.calculateIndices(ctData);
+        final riskAssessment = CalculationEngine.assessRisk(indices, ctData, roData: roData);
+        
+        am.ROProtectionAssessment? roAssessment;
+        if (roData != null) {
           roAssessment = CalculationEngine.assessRO(roData);
-       }
-       
-       systemHealth = CalculationEngine.calculateHealth(riskAssessment, roAssessment);
-    } else {
-       // Fallback to DB columns if JSON parse failed
-       riskAssessment = am.RiskAssessment(
-          scalingScore: (latestReport.data['risk_scaling'] as num?)?.toDouble() ?? 0.0,
-          corrosionScore: (latestReport.data['risk_corrosion'] as num?)?.toDouble() ?? 0.0,
-          foulingScore: (latestReport.data['risk_fouling'] as num?)?.toDouble() ?? 0.0,
-          scalingRisk: _getRiskLevel((latestReport.data['risk_scaling'] as num?)?.toDouble() ?? 0.0),
-          corrosionRisk: _getRiskLevel((latestReport.data['risk_corrosion'] as num?)?.toDouble() ?? 0.0),
-          foulingRisk: _getRiskLevel((latestReport.data['risk_fouling'] as num?)?.toDouble() ?? 0.0),
-          timestamp: latestReport.analyzedAt,
-       );
-       systemHealth = CalculationEngine.calculateHealth(riskAssessment, null);
-    }
-    
-    // Recommendations need full data context, so we might return empty or generic ones
-    final recommendations = <am.Recommendation>[]; 
-    if (systemHealth != null) {
-       // Use engine to generate recs if we have data
-       if (ctData != null && riskAssessment != null) {
-          recommendations.addAll(CalculationEngine.generateRecommendations(riskAssessment, systemHealth, null));
-       }
-    }
+        }
+        
+        final systemHealth = CalculationEngine.calculateHealth(riskAssessment, roAssessment, ctData: ctData, roData: roData);
+        
+        // 4. Generate Recommendations
+        final recommendations = CalculationEngine.generateRecommendations(
+            riskAssessment, systemHealth, roData, ctData: ctData, indices: indices);
 
-    return FactorySystemState(
-      isLoading: false,
-      health: systemHealth,
-      riskAssessment: riskAssessment,
-      roAssessment: null, 
-      coolingTowerData: ctData,
-      recommendations: recommendations,
-    );
-  });
+        return FactorySystemState(
+          isLoading: false,
+          health: systemHealth,
+          riskAssessment: riskAssessment,
+          roAssessment: roAssessment,
+          coolingTowerData: ctData,
+          roData: roData,
+          recommendations: recommendations,
+        );
+      });
 });
-
-// Extension to expose private helper if needed, or we just duplicate the helper since it's small
-// Helper to determine risk level from score
-am.RiskLevel _getRiskLevel(double score) {
-  if (score < 20) return am.RiskLevel.low;
-  if (score < 50) return am.RiskLevel.medium;
-  if (score < 80) return am.RiskLevel.high;
-  return am.RiskLevel.critical;
-}

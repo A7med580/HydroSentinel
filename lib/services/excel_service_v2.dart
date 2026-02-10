@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:excel/excel.dart';
+import 'package:flutter/foundation.dart';
 import '../models/chemistry_models.dart';
 import '../models/analytics_models.dart';
 import '../models/assessment_models.dart';
@@ -19,21 +20,31 @@ class ExcelService {
     var entrySheet = excel.tables['Entry'] ?? excel.tables['Sheet1'];
     
     if (entrySheet == null) {
-      print('DEBUG: No valid sheet found. Available: ${excel.tables.keys.toList()}');
+      if (kDebugMode) {
+        print('DEBUG: No valid sheet found. Available: ${excel.tables.keys.toList()}');
+      }
       return {'measurements': <WaterMeasurement>[]};
     }
 
-    print('DEBUG: --- EXCEL CONTENT DUMP ---');
-    for (int i = 0; i < entrySheet.maxRows && i < 5; i++) {
-       print('Row $i: ${entrySheet.rows[i].map((e) => e?.value).toList()}');
+    if (kDebugMode) {
+      print('DEBUG: --- EXCEL CONTENT DUMP ---');
     }
-    print('DEBUG: --------------------------');
+    for (int i = 0; i < entrySheet.maxRows && i < 5; i++) {
+       if (kDebugMode) {
+         print('Row $i: ${entrySheet.rows[i].map((e) => e?.value).toList()}');
+       }
+    }
+    if (kDebugMode) {
+      print('DEBUG: --------------------------');
+    }
 
     // Detect column layout
     final headerRow = entrySheet.rows[0];
     final columnMap = _mapColumns(headerRow);
     
-    print('DEBUG: Column map: $columnMap');
+    if (kDebugMode) {
+      print('DEBUG: Column map: $columnMap');
+    }
 
     List<WaterMeasurement> measurements = [];
     
@@ -47,11 +58,15 @@ class ExcelService {
           measurements.add(measurement);
         }
       } catch (e) {
-        print('WARNING: Skipped row $rowIndex: $e');
+        if (kDebugMode) {
+          print('WARNING: Skipped row $rowIndex: $e');
+        }
       }
     }
 
-    print('DEBUG: Parsed ${measurements.length} measurements');
+    if (kDebugMode) {
+      print('DEBUG: Parsed ${measurements.length} measurements');
+    }
 
     // Parse RO sheet (if exists)
     await _parseROSheet(excel, measurements);
@@ -124,7 +139,9 @@ class ExcelService {
 
     // Validate: require at minimum pH and alkalinity
     if (ph <= 0 && alk <= 0) {
-      print('DEBUG: Skipping row $rowIndex (missing critical params)');
+      if (kDebugMode) {
+        print('DEBUG: Skipping row $rowIndex (missing critical params)');
+      }
       return null;
     }
 
@@ -170,7 +187,9 @@ class ExcelService {
         final excelEpoch = DateTime(1899, 12, 30);
         return excelEpoch.add(Duration(days: cellValue.toInt()));
       } catch (e) {
-        print('DEBUG: Failed to parse Excel date: $e');
+        if (kDebugMode) {
+          print('DEBUG: Failed to parse Excel date: $e');
+        }
         return null;
       }
     }
@@ -202,7 +221,9 @@ class ExcelService {
       return DateTime(year, month, day);
     }
 
-    print('DEBUG: Unrecognized date format: $dateStr');
+    if (kDebugMode) {
+      print('DEBUG: Unrecognized date format: $dateStr');
+    }
     return null;
   }
 

@@ -15,28 +15,66 @@ class EmailVerificationScreen extends ConsumerStatefulWidget {
 class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScreen> {
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    // Listen for auth state changes (e.g. creating session from deep link)
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      if (data.session != null && data.session!.user.emailConfirmedAt != null) {
+        if (mounted) {
+           // Main app Listeners will handle the routing, but we can force refresh if needed
+           ref.refresh(authStateProvider);
+        }
+      }
+    });
+  }
+
   Future<void> _checkVerification() async {
     setState(() => _isLoading = true);
     
-    // Refresh user session to get latest data
     try {
-      final response = await Supabase.instance.client.auth.refreshSession();
+      // 1. Try to fetch the latest user details. 
+      // This works even if the session is stale, as long as the refresh token is valid.
+      final response = await Supabase.instance.client.auth.getUser();
       final user = response.user;
 
       if (user != null && user.emailConfirmedAt != null) {
-         // Proceed to app handled by auth state change usually, or manual nav
-         // We will rely on the main.dart AuthState logic to pick this up, but we can trigger a reload.
+         // Verified!
+         if (mounted) {
+           ScaffoldMessenger.of(context).showSnackBar(
+             const SnackBar(content: Text('Verified! Redirecting...'), backgroundColor: Colors.green),
+           );
+           // Force refresh of auth state to trigger main navigation
+           ref.refresh(authStateProvider);
+         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Email not verified yet. Please check your inbox.')),
+            const SnackBar(content: Text('Not verified yet. Please check your email.')),
+          );
+        }
+      }
+    } on AuthException catch (e) {
+      // If session is missing (400 or 401), we might need to ask user to login again
+      if (e.message.contains('session missing') || e.statusCode == '403') {
+         if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Session expired. Please sign in again.')),
+            );
+            // Redirect to Login
+            await ref.read(authRepositoryProvider).signOut();
+         }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+             SnackBar(content: Text('Error: ${e.message}')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error checking verification: $e')),
+          SnackBar(content: Text('Error: $e')),
         );
       }
     } finally {
@@ -53,6 +91,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
       await Supabase.instance.client.auth.resend(
         type: OtpType.signup,
         email: email,
+        emailRedirectTo: 'hydrosentinel://login-callback',
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -77,7 +116,7 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Center(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppStyles.paddingL),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -123,13 +162,20 @@ class _EmailVerificationScreenState extends ConsumerState<EmailVerificationScree
                 onPressed: _isLoading ? null : _resendEmail,
                 child: const Text('Resend Email'),
               ),
-              const SizedBox(height: 8),
-              TextButton(
+              const SizedBox(height: 24),
+              // Explicit "Back to Login" button as requested
+              OutlinedButton.icon(
                 onPressed: () async {
+                   // Ensure we clear any stale state
                    await ref.read(authRepositoryProvider).signOut();
                    // Main auth state listener will handle redirection to Login
                 },
-                child: const Text('Sign Out', style: TextStyle(color: Colors.grey)),
+                icon: const Icon(Icons.arrow_back),
+                label: const Text('Back to Login'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.textSecondary,
+                  side: const BorderSide(color: AppColors.border),
+                ),
               ),
             ],
           ),

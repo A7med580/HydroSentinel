@@ -9,6 +9,8 @@ class ExcelSchema {
   static const String zinc = 'zinc';
   static const String iron = 'iron';
   static const String phosphate = 'phosphate';
+  static const String temperature = 'temperature';
+  static const String sulfate = 'sulfate';
   
   // RO Parameters
   static const String freeChlorine = 'free_chlorine';
@@ -29,6 +31,8 @@ class ExcelSchema {
     zinc: ['zinc', 'zn', 'zn2+'],
     iron: ['iron', 'fe', 'total iron', 'fe2+', 'fe3+'],
     phosphate: ['phosphate', 'po4', 'ortho phosphate', 'phosphates', 'ortho-po4'],
+    temperature: ['temperature', 'temp', 'water temp', 'water temperature'],
+    sulfate: ['sulfate', 'so4', 'sulphate'],
     date: ['date', 'report date', 'sampling date', 'date of sampling', 'time'],
     
     // RO

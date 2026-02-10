@@ -62,9 +62,9 @@ class FactoryIndicesScreen extends ConsumerWidget {
               ),
               _buildIndexCard(
                 'Larson-Skold Ratio',
-                indices.larsonSkold.toStringAsFixed(2),
-                _getLarsonInterpretation(indices.larsonSkold),
-                _getLarsonColor(indices.larsonSkold),
+                (indices.larsonSkold ?? 0.0).toStringAsFixed(2),
+                _getLarsonInterpretation(indices.larsonSkold ?? 0.0),
+                _getLarsonColor(indices.larsonSkold ?? 0.0),
                 'Ratio of corrosive ions to inhibitory ions.',
               ),
               _buildIndexCard(

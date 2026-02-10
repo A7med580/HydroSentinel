@@ -9,24 +9,28 @@ class CalculatedIndices {
   final double lsi;
   final double rsi;
   final double psi;
-  final double stiffDavis;
-  final double larsonSkold;
+  final double? stiffDavis;    // Null if TDS < 1000 (S&D designed for high-TDS brines)
+  final double? larsonSkold;   // Null if sulfate not measured and safe mode is active
   final double coc;
   final double adjustedPsi;
   final double tdsEstimation;
   final double chlorideSulfateRatio;
+  final double usedTemperature;   // Actual temperature used in calculation (for traceability)
+  final bool sulfateEstimated;    // True if sulfate was estimated from chloride
   final DateTime timestamp;
 
   CalculatedIndices({
     required this.lsi,
     required this.rsi,
     required this.psi,
-    required this.stiffDavis,
-    required this.larsonSkold,
+    this.stiffDavis,
+    this.larsonSkold,
     required this.coc,
     required this.adjustedPsi,
     required this.tdsEstimation,
     required this.chlorideSulfateRatio,
+    required this.usedTemperature,
+    required this.sulfateEstimated,
     required this.timestamp,
   });
 }

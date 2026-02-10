@@ -87,10 +87,10 @@ class ExcelNormalizer {
   static int _countSchemaMatches(List<Data?> row) {
     int count = 0;
     for (var cell in row) {
-      if (cell?.value != null) {
-        if (ExcelSchema.match(cell!.value.toString()) != null) {
+      // SAFE: No bang operator
+      final val = cell?.value?.toString();
+      if (val != null && ExcelSchema.match(val) != null) {
           count++;
-        }
       }
     }
     return count;
@@ -117,16 +117,19 @@ class ExcelNormalizer {
   // Look for "Date: 2023-01-01" type cells above the header row
   static DateTime? _findDateInMetadata(List<List<Data?>> rows, int headerRowIndex) {
     for (int i = 0; i < headerRowIndex; i++) {
+        // Ensure row bounds just in case
+        if (i >= rows.length) continue;
+        
       for (var cell in rows[i]) {
-         if (cell?.value != null) {
-            final str = cell!.value.toString().toLowerCase();
-            if (str.contains('date')) {
+          // SAFE: No bang operator
+          final str = cell?.value?.toString().toLowerCase();
+          if (str != null && str.contains('date')) {
                 // Check next cell?
                // Simplified for now, just regex checking could be better
             }
-         }
       }
     }
     return null; // TODO: Implement robust metadata scraping if column is missing
   }
 }
+

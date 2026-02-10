@@ -84,12 +84,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               _buildTextField('Password', _passwordController, true),
               const SizedBox(height: 24),
               if (_errorMessage != null)
-                Padding(
+                Container(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    _errorMessage!,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
+                  constraints: const BoxConstraints(maxHeight: 100),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 ),
               SizedBox(
@@ -111,7 +114,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: _showForgotPasswordDialog,
+                child: const Text('Forgot Password?', style: TextStyle(color: AppColors.textSecondary)),
+              ),
+              const SizedBox(height: 8),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
@@ -149,6 +157,65 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: AppColors.primary),
         ),
+      ),
+    );
+  }
+
+  void _showForgotPasswordDialog() {
+    final emailController = TextEditingController(text: _emailController.text);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Enter your email address to receive a password reset link.'),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final email = emailController.text.trim();
+              if (email.isEmpty) return;
+              
+              Navigator.pop(context); // Close dialog
+              
+              // Call reset password
+              // We could show a loading indicator here or a snackbar
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Sending reset email...')),
+              );
+              
+              final result = await ref.read(authRepositoryProvider).resetPasswordForEmail(email);
+              
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              
+              result.fold(
+                (failure) => ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Failed: ${failure.message}'), backgroundColor: Colors.red),
+                ),
+                (_) => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Check your email for the reset link'), backgroundColor: Colors.green),
+                ),
+              );
+            },
+            child: const Text('Send Reset Link'),
+          ),
+        ],
       ),
     );
   }

@@ -41,8 +41,8 @@ class IndicesScreen extends ConsumerWidget {
           ),
           _buildIndexCard(
             'Larson-Skold Ratio',
-            indices.larsonSkold,
-            _getLarsonInterpretation(indices.larsonSkold),
+            indices.larsonSkold ?? 0.0,
+            _getLarsonInterpretation(indices.larsonSkold ?? 0.0),
             'Ratio of corrosive ions to inhibitory ions.',
           ),
           _buildIndexCard(
@@ -52,7 +52,7 @@ class IndicesScreen extends ConsumerWidget {
             'Number of times makeup water has been concentrated.',
           ),
           _buildIndexGrid([
-            _IndexSimple('Stiff-Davis', indices.stiffDavis),
+            _IndexSimple('Stiff-Davis', indices.stiffDavis ?? 0.0),
             _IndexSimple('Adjusted PSI', indices.adjustedPsi),
             _IndexSimple('TDS Est.', indices.tdsEstimation),
             _IndexSimple('Cl/SO4 Ratio', indices.chlorideSulfateRatio),

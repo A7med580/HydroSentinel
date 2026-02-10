@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../core/app_styles.dart';
 import '../../features/dashboard/dashboard_screen.dart';
+import '../../features/factories/presentation/factories_screen.dart';
+import '../../features/parameters/parameters_screen.dart';
+import '../../features/indices/indices_screen.dart';
+import '../../features/alerts/alerts_screen.dart';
 import '../../features/trends/trends_screen.dart';
-import '../../features/reports/reports_screen.dart';
-import '../../features/upload/upload_screen.dart';
+import '../../features/simulation/simulation_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -17,51 +20,37 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final List<Widget> _screens = [
     const DashboardScreen(),
+    const FactoriesScreen(),
+    const ParametersScreen(),
+    const IndicesScreen(),
+    const AlertsScreen(),
     const TrendsScreen(),
-    const ReportsScreen(),
-    const UploadScreen(),
+    const SimulationScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: AppStyles.backgroundGradient,
-        child: _screens[_currentIndex],
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
       ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          boxShadow: AppShadows.bottomNav,
-        ),
-        child: SafeArea(
-          child: BottomNavigationBar(
-            currentIndex: _currentIndex,
-            onTap: (index) => setState(() => _currentIndex = index),
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_outlined),
-                activeIcon: Icon(Icons.home),
-                label: 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.trending_up_outlined),
-                activeIcon: Icon(Icons.trending_up),
-                label: 'Trends',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.description_outlined),
-                activeIcon: Icon(Icons.description),
-                label: 'Reports',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.upload_outlined),
-                activeIcon: Icon(Icons.upload),
-                label: 'Upload',
-              ),
-            ],
-          ),
-        ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: AppColors.surface,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: AppColors.textSecondary,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
+          BottomNavigationBarItem(icon: Icon(Icons.factory), label: 'Factories'),
+          BottomNavigationBarItem(icon: Icon(Icons.water_drop), label: 'Parameters'),
+          BottomNavigationBarItem(icon: Icon(Icons.analytics), label: 'Intelligence'),
+          BottomNavigationBarItem(icon: Icon(Icons.warning), label: 'Alerts'),
+          BottomNavigationBarItem(icon: Icon(Icons.show_chart), label: 'Trends'),
+          BottomNavigationBarItem(icon: Icon(Icons.science), label: 'Simulate'),
+        ],
       ),
     );
   }

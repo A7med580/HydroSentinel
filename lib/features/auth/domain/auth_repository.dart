@@ -7,5 +7,6 @@ abstract class AuthRepository {
   Future<Either<Failure, UserEntity>> signUpWithEmail(String email, String password);
   Future<Either<Failure, void>> signOut();
   Future<Either<Failure, UserEntity>> getCurrentUser();
+  Future<Either<Failure, void>> resetPasswordForEmail(String email);
   Stream<UserEntity?> get authStateChanges;
 }

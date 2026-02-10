@@ -29,7 +29,22 @@ class AuthRepositoryImpl implements AuthRepository {
     } on Failure catch (e) {
       return Left(e);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      return Left(AuthFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> resetPasswordForEmail(String email) async {
+    try {
+      // The provided snippet uses '_supabase.auth.resetPasswordForEmail(email)'.
+      // Assuming 'dataSource' is the correct entry point for remote operations.
+      // I will call a corresponding method on 'dataSource'.
+      await dataSource.resetPasswordForEmail(email);
+      return const Right(null);
+    } on Failure catch (e) {
+      return Left(e);
+    } catch (e) {
+      return Left(AuthFailure('Failed to send reset email: $e'));
     }
   }
 
@@ -48,13 +63,17 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, UserEntity>> getCurrentUser() async {
     try {
+      // The dataSource.getCurrentUser now performs the server-side check
       final user = await dataSource.getCurrentUser();
+      
       if (user != null) {
         return Right(user);
       } else {
+        await dataSource.signOut(); // Clean up invalid session
         return const Left(AuthFailure('No user logged in'));
       }
     } catch (e) {
+      await dataSource.signOut(); // Clean up invalid session
       return Left(ServerFailure(e.toString()));
     }
   }
