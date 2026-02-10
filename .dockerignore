@@ -1,0 +1,16 @@
+build/
+.dart_tool/
+.git/
+.idea/
+.vscode/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+android/
+ios/
+linux/
+macos/
+windows/
+test/
